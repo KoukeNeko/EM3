@@ -26,7 +26,10 @@ export interface Prefs {
 	nickname: string;
 	theme: string;
 	motion: MotionPref;
+	/** Range of the dashboard calendar. */
 	calendarSpan: CalendarSpan;
+	/** Range of the calendar page. */
+	calendarPageSpan: CalendarSpan;
 	showWeekend: boolean;
 	/** Reusable feedback phrases for grading (Markdown). */
 	snippets: string[];
@@ -52,6 +55,7 @@ export const DEFAULT_PREFS: Prefs = {
 	theme: "system",
 	motion: "full",
 	calendarSpan: "week",
+	calendarPageSpan: "month",
 	showWeekend: false,
 	courses: {},
 	timetable: {},

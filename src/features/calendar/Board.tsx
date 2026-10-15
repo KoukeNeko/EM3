@@ -33,8 +33,8 @@ function shift(span: CalendarSpan, anchor: Date, dir: number) {
 	return addDays(anchor, dir * (span === "week" ? 7 : 14));
 }
 
-export function CalendarBoard({ tasks, compact = false }: { tasks: Task[]; compact?: boolean }) {
-	const span = usePrefs(s => s.calendarSpan);
+export function CalendarBoard({ tasks, compact = false, spanKey = "calendarSpan" }: { tasks: Task[]; compact?: boolean; spanKey?: "calendarSpan" | "calendarPageSpan" }) {
+	const span = usePrefs(s => s[spanKey]);
 	const setPref = usePrefs(s => s.set);
 	const showWeekend = usePrefs(s => s.showWeekend);
 	const timetable = usePrefs(s => s.timetable);
@@ -78,7 +78,7 @@ export function CalendarBoard({ tasks, compact = false }: { tasks: Task[]; compa
 		{ keys: "arrowleft", run: () => go(-1) },
 		{ keys: "arrowright", run: () => go(1) },
 		{ keys: "t", run: () => go(0) },
-		{ keys: "v", run: () => setPref("calendarSpan", order[(order.indexOf(span) + 1) % order.length]) }
+		{ keys: "v", run: () => setPref(spanKey, order[(order.indexOf(span) + 1) % order.length]) }
 	]);
 
 	return (
@@ -87,7 +87,7 @@ export function CalendarBoard({ tasks, compact = false }: { tasks: Task[]; compa
 				<h2 className="mr-auto text-[0.95rem] font-semibold tracking-tight tabular-nums">{title}</h2>
 				<div className="flex items-center rounded-full bg-base-200 p-0.5" role="tablist" aria-label="時間範圍">
 					{SPANS.map(s => (
-						<button key={s.key} role="tab" aria-selected={span === s.key} onClick={() => setPref("calendarSpan", s.key)} className="relative rounded-full px-3 py-1 text-xs font-medium">
+						<button key={s.key} role="tab" aria-selected={span === s.key} onClick={() => setPref(spanKey, s.key)} className="relative rounded-full px-3 py-1 text-xs font-medium">
 							{span === s.key && <motion.span layoutId="span-pill" className="absolute inset-0 rounded-full bg-base-100 shadow-sm" />}
 							<span className="relative">{s.label}</span>
 						</button>

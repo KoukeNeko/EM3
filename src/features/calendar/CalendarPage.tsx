@@ -15,7 +15,7 @@ export function CalendarPage() {
 					顯示週末
 				</label>
 			</PageTitle>
-			{error ? <ErrorNote error={error} retry={refetch} /> : <CalendarBoard tasks={tasks} compact />}
+			{error ? <ErrorNote error={error} retry={refetch} /> : <CalendarBoard tasks={tasks} compact spanKey="calendarPageSpan" />}
 		</div>
 	);
 }

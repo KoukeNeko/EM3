@@ -82,22 +82,29 @@ export function SettingsPage() {
 						<input className="input w-full max-w-xs" placeholder={me?.firstname ?? ""} value={prefs.nickname} onChange={e => prefs.set("nickname", e.target.value)} />
 						<p className="label">空白就用 E3 上的名字。</p>
 					</fieldset>
-					<fieldset className="fieldset">
-						<legend className="fieldset-legend">首頁行事曆預設範圍</legend>
-						<div className="join">
-							{(
-								[
-									["week", "一週"],
-									["twoWeeks", "兩週"],
-									["month", "一個月"]
-								] as [CalendarSpan, string][]
-							).map(([k, label]) => (
-								<button key={k} className={`btn join-item btn-sm ${prefs.calendarSpan === k ? "btn-active" : ""}`} onClick={() => prefs.set("calendarSpan", k)}>
-									{label}
-								</button>
-							))}
-						</div>
-					</fieldset>
+					{(
+						[
+							["calendarSpan", "首頁行事曆預設範圍"],
+							["calendarPageSpan", "行事曆頁預設範圍"]
+						] as const
+					).map(([key, legend]) => (
+						<fieldset key={key} className="fieldset">
+							<legend className="fieldset-legend">{legend}</legend>
+							<div className="join">
+								{(
+									[
+										["week", "一週"],
+										["twoWeeks", "兩週"],
+										["month", "一個月"]
+									] as [CalendarSpan, string][]
+								).map(([k, label]) => (
+									<button key={k} className={`btn join-item btn-sm ${prefs[key] === k ? "btn-active" : ""}`} onClick={() => prefs.set(key, k)}>
+										{label}
+									</button>
+								))}
+							</div>
+						</fieldset>
+					))}
 					<label className="flex max-w-sm cursor-pointer items-center justify-between gap-3 text-sm">
 						行事曆顯示週末
 						<input type="checkbox" className="toggle toggle-sm" checked={prefs.showWeekend} onChange={e => prefs.set("showWeekend", e.target.checked)} />
