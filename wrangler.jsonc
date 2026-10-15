@@ -1,9 +1,11 @@
 {
-	"name": "elvismao",
-	"compatibility_date": "2025-06-01",
+	"name": "em3",
+	"account_id": "247e3a0e0c4b1d5d8ca405dfc0ffd2d0",
+	"compatibility_date": "2026-10-01",
 	"assets": {
 		"directory": "./dist",
-		"html_handling": "force-trailing-slash",
-		"not_found_handling": "404-page"
-	}
+		"not_found_handling": "single-page-application"
+	},
+	"routes": [{ "pattern": "e3.emtech.cc", "custom_domain": true }],
+	"workers_dev": false
 }
