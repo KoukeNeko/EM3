@@ -28,17 +28,18 @@ function Shot({ name, alt, eager = false, className = "" }: { name: string; alt:
 	return (
 		<div className={`overflow-hidden rounded-xl border border-base-content/10 bg-base-200 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.35)] ${className}`}>
 			{(["light", "dark"] as const).map(s => (
-				<img key={s} src={`./screens/${name}-${s}.webp`} alt={alt} width={2400} height={1500} loading={eager ? "eager" : "lazy"} decoding="async" className={`block h-auto w-full shot-${s}`} />
+				<img key={s} src={`./screens/${name}-${s}.webp`} alt={alt} width={3840} height={2160} loading={eager ? "eager" : "lazy"} decoding="async" className={`block h-auto w-full shot-${s}`} />
 			))}
 		</div>
 	);
 }
 
+/** The phone shots already have the iPhone 17 Pro frame baked in (see scripts/screens-to-webp.py). */
 function Phone({ name, alt }: { name: string; alt: string }) {
 	return (
-		<div className="overflow-hidden rounded-[2.4rem] border-[7px] border-neutral bg-neutral shadow-[0_30px_80px_-30px_rgba(0,0,0,0.45)]">
+		<div className="drop-shadow-[0_30px_40px_rgba(0,0,0,0.25)]">
 			{(["light", "dark"] as const).map(s => (
-				<img key={s} src={`./screens/${name}-${s}.webp`} alt={alt} width={780} height={1688} loading="lazy" decoding="async" className={`block h-auto w-full rounded-[1.9rem] shot-${s}`} />
+				<img key={s} src={`./screens/${name}-${s}.webp`} alt={alt} width={900} height={1840} loading="lazy" decoding="async" className={`block h-auto w-full shot-${s}`} />
 			))}
 		</div>
 	);
@@ -92,7 +93,7 @@ const TIME_EXAMPLES = [
 
 const KEYS = [
 	[`${MOD_LABEL} K`, "跳到任何一門課"],
-	["1 – 7", "切換頁面"],
+	["1 – 8", "切換頁面"],
 	["J  K", "上下移動"],
 	["[  ]", "切換課程分頁"],
 	["U", "選檔案上傳"],
@@ -150,11 +151,11 @@ export function LandingPage() {
 					>
 						交大 E3，
 						<br />
-						終於看得懂了。
+						拉完了。
 					</motion.h1>
 					<motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 120, damping: 20, delay: 0.08 }}>
 						<p className="mt-8 max-w-2xl text-lg leading-relaxed text-base-content/70 sm:text-xl">
-							EM3 是給陽明交大學生的 E3 客戶端。打開就知道這週要交什麼、現在這堂課的投影片在哪，作業拖進來就交。不用安裝，用原本的 E3 帳號登入。
+							EM3 是給人用的 E3 客戶端，設計給無論是老師還是學生。打開就知道這週要交什麼、現在這堂課的投影片在哪，作業拖進來就交。不用安裝，用原本的 E3 帳號登入。
 						</p>
 						<div className="mt-10 flex flex-wrap gap-3">
 							{cta}
@@ -172,12 +173,12 @@ export function LandingPage() {
 				<div className="space-y-28 pb-28 sm:space-y-40 sm:pb-40">
 					<section className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-16">
 						<motion.h2 {...reveal} className="text-3xl leading-tight font-bold tracking-tight text-balance sm:text-4xl lg:col-span-5">
-							打開就知道
+							打開毫無重點，
 							<br />
-							今天要做什麼
+							什麼都找不到。
 						</motion.h2>
 						<motion.div {...reveal} className="space-y-4 text-[1.05rem] leading-relaxed text-base-content/70 lg:col-span-7">
-							<p>原本的 E3 首頁要往下捲四個螢幕，才看得到沒有課名的「未來事件」。EM3 的第一個畫面就是這週：哪門課、交了沒、還剩多久。</p>
+							<p>原本的 E3 首頁要往下捲整個畫面，才看得到沒有課名的「未來事件」。EM3 的第一個畫面就是這週：哪門課、交了沒、還剩多久。</p>
 							<p>設定好課表之後，正在上的那堂課會放在最上面，還有幾分鐘下課、教材、作業、公告，都在一步之內。</p>
 						</motion.div>
 					</section>
@@ -219,11 +220,11 @@ export function LandingPage() {
 						flip
 						title={
 							<>
-								拖進來，
+								上傳檔案，
 								<br />
-								確認，
+								交出去，
 								<br />
-								交出去
+								很難嗎？
 							</>
 						}
 						shot={<Shot name="submit" alt="EM3 作業頁：拖放檔案後按繳交" />}
@@ -235,9 +236,11 @@ export function LandingPage() {
 					<Feature
 						title={
 							<>
-								四十門課，
+								學期過了，
 								<br />
-								一頁看完
+								課程就不見了
+								<br />
+								是三小。
 							</>
 						}
 						shot={<Shot name="courses" alt="EM3 課程列表：依學期分組，每門課有自己的顏色與圖示" />}
@@ -260,9 +263,53 @@ export function LandingPage() {
 						<p>貼上課綱上的時間代碼，像是 T34R7-EC022，或直接在格子上點。之後側欄和首頁會自動把正在上的課標出來，連下課倒數都有。</p>
 					</Feature>
 
+					<section className="grid grid-cols-1 gap-8 border-t border-base-content/10 pt-20 lg:grid-cols-12 lg:gap-16">
+						<motion.h2 {...reveal} className="text-3xl leading-tight font-bold tracking-tight text-balance sm:text-5xl lg:col-span-6">
+							老師那一側的 E3，
+							<br />
+							一樣拉完了。
+						</motion.h2>
+						<motion.div {...reveal} className="space-y-4 text-[1.05rem] leading-relaxed text-base-content/70 lg:col-span-6">
+							<p>我們模擬訪談了五位老師、五位助教，從 150 人的必修大班到一週來一天的兼任講師。十個人的第一名都一樣：改作業。</p>
+							<p>評分表在 1920 寬的螢幕上一列都塞不下；下載全部的資料夾用的是對不回學號的「參與者編號」；有四份選課已失效的學生交的作業，根本不在評分表裡。</p>
+						</motion.div>
+					</section>
+
+					<Feature
+						title={
+							<>
+								J、K、⌘↵，
+								<br />
+								下一位。
+							</>
+						}
+						shot={<Shot name="grading" alt="EM3 評分工作台：左邊學生名單，右邊繳交內容與評分" />}
+					>
+						<p>左邊名單、右邊作業，打分數、寫評語、⌘↵ 存檔跳下一位。評語可以用按鈕排版或直接寫 Markdown，常用的句子存成片語一鍵插入。</p>
+						<p>下載全部會照「學號_姓名」分資料夾、附成績表；改好的檔案拖回來自動對回每位學生，成績用 CSV 匯入、寫入前先給你看新舊對照。Excel 存成 Big5 也讀得懂。</p>
+					</Feature>
+
+					<section className="space-y-10">
+						<motion.div {...reveal} className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-16">
+							<h2 className="text-3xl leading-tight font-bold tracking-tight sm:text-4xl lg:col-span-5">
+								出題要 136 個欄位，
+								<br />
+								是在哈囉？
+							</h2>
+							<div className="space-y-4 text-[1.05rem] leading-relaxed text-base-content/70 lg:col-span-7">
+								<p>在 EM3 打題目，或直接從 Excel 貼上，下載 Moodle XML 丟進 E3 題庫，一份小考從一百多次點擊變成幾分鐘。</p>
+								<p>公告用 Markdown 寫，程式碼、數學式都留得住；發布前先看學生會看到的樣子。E3 沒開放新增教材的 API，所以教材在這裡寫好、一鍵複製貼回 E3。</p>
+							</div>
+						</motion.div>
+						<motion.div {...reveal} className="grid grid-cols-1 gap-6 md:grid-cols-2">
+							<Shot name="quiz" alt="EM3 小考出題：題目卡片與 Moodle XML 匯出" />
+							<Shot name="announce" alt="EM3 發布公告：Milkdown 編輯器" />
+						</motion.div>
+					</section>
+
 					<section className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-16">
 						<motion.div {...reveal} className="lg:col-span-5">
-							<h2 className="text-3xl leading-tight font-bold tracking-tight sm:text-4xl">滑鼠可以放著</h2>
+							<h2 className="text-3xl leading-tight font-bold tracking-tight sm:text-4xl">全鍵盤操作，有手就行</h2>
 							<p className="mt-5 text-[1.05rem] leading-relaxed text-base-content/70">每個按鈕都能用 Tab 走到，常用的事都有單鍵快捷鍵。忘了的時候，按 {MOD_LABEL} / 就會列出來。</p>
 							<dl className="mt-8 grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
 								{KEYS.map(([k, label]) => (
@@ -345,7 +392,8 @@ export function LandingPage() {
 								<strong className="text-base-content">不存密碼。</strong>密碼只用來向 E3 換一組登入憑證，憑證放在這個網站的 cookie，登出就清掉。
 							</li>
 							<li>
-								<strong className="text-base-content">不替你按已讀。</strong>公告的已讀狀態只記在你的瀏覽器；EM3 也不會在你按下繳交之前碰你的作業。
+								<strong className="text-base-content">不替你按已讀。</strong>公告的已讀狀態只記在你的瀏覽器（站內信例外，打開時會像在 E3 一樣標為已讀）；EM3
+								不會在你按下繳交之前碰你的作業，老師的評分也要按下儲存才會寫入。
 							</li>
 							<li>
 								<strong className="text-base-content">程式碼全部公開。</strong>
@@ -375,7 +423,7 @@ export function LandingPage() {
 				<div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-base-content/55 sm:flex-row sm:items-center sm:px-6">
 					<span className="flex items-center gap-2">
 						<Logo size={20} />
-						EM3 是非官方專案，與國立陽明交通大學無關。
+						EM3 由<a href="https://elvismao.com/">毛哥EM</a>製作，與國立陽明交通大學無關。
 					</span>
 					<span className="sm:ml-auto">
 						<a href={REPO} target="_blank" rel="noreferrer" className="link link-hover">
