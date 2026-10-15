@@ -64,30 +64,25 @@ execFileSync("python3", [
 ]);
 
 // Open Graph: 1200×630, drawn at 2x and saved as JPEG to stay well under the 5 MB limit platforms use.
-const shot = readFileSync(pub("screens/dashboard-light.webp")).toString("base64");
-const mark = `<svg viewBox="0 0 181 151" width="56" height="47"><defs><linearGradient id="m" x1="90.5" y1="0" x2="90.5" y2="151" gradientUnits="userSpaceOnUse"><stop stop-color="${FROM}"/><stop offset="1" stop-color="${TO}"/></linearGradient></defs>${paths.map(d => `<path d="${d}" fill="url(#m)"/>`).join("")}</svg>`;
+// Flat on purpose: one background colour, the headline, and the real app standing upright.
+const phone = readFileSync(pub("screens/mobile-dashboard-dark.webp")).toString("base64");
+const mark = `<svg viewBox="0 0 181 151" width="44" height="37"><defs><linearGradient id="m" x1="90.5" y1="0" x2="90.5" y2="151" gradientUnits="userSpaceOnUse"><stop stop-color="${FROM}"/><stop offset="1" stop-color="${TO}"/></linearGradient></defs>${paths.map(d => `<path d="${d}" fill="url(#m)"/>`).join("")}</svg>`;
 const og = await browser.newPage({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 2 });
 await og.setContent(`<!doctype html><html><head>
 <link rel="stylesheet" href="https://font.emtech.cc/css/MiSansTC.css">
 <style>
 *{box-sizing:border-box;margin:0}
-body{width:1200px;height:630px;overflow:hidden;position:relative;background:#fbfbfd;color:#1c1d22;font-family:"MiSansTC","MiSans TC",sans-serif}
-.blob{position:absolute;border-radius:50%;filter:blur(90px)}
-.brand{position:absolute;left:72px;top:64px;display:flex;align-items:center;gap:16px;font-size:34px;font-weight:600;letter-spacing:-0.01em}
-h1{position:absolute;left:72px;top:178px;font-size:80px;line-height:1.08;font-weight:900;letter-spacing:-0.02em}
-p{position:absolute;left:76px;top:392px;font-size:26px;line-height:1.5;color:#5d5f68;font-weight:400}
-.url{position:absolute;left:76px;bottom:62px;font-size:24px;font-weight:600;color:#7a5cc4;letter-spacing:0.01em}
-.shot{position:absolute;left:810px;top:150px;width:860px;border-radius:22px;overflow:hidden;box-shadow:0 40px 80px -30px rgba(40,30,70,.35),0 0 0 1px rgba(20,20,40,.06);transform:perspective(1800px) rotateY(-14deg) rotateX(6deg);transform-origin:0 50%}
-.shot img{display:block;width:100%}
+body{width:1200px;height:630px;overflow:hidden;position:relative;background:#141417;color:#f3f3f5;font-family:"MiSansTC","MiSans TC",sans-serif}
+h1{position:absolute;left:72px;top:96px;font-size:92px;line-height:1.1;font-weight:900;letter-spacing:-0.03em}
+p{position:absolute;left:76px;top:330px;font-size:27px;line-height:1.55;color:#9d9da6}
+.foot{position:absolute;left:72px;bottom:64px;display:flex;align-items:center;gap:14px;font-size:26px;font-weight:600}
+.foot span{color:#7d7d86;font-weight:400}
+.phone{position:absolute;left:862px;top:64px;width:300px}
 </style></head><body>
-<div class="blob" style="left:-120px;top:-160px;width:520px;height:420px;background:#f5c6d3;opacity:.55"></div>
-<div class="blob" style="right:-60px;top:-120px;width:620px;height:460px;background:#d9c8f3;opacity:.6"></div>
-<div class="blob" style="right:120px;bottom:-220px;width:560px;height:380px;background:#fbe0b4;opacity:.55"></div>
-<div class="shot"><img src="data:image/webp;base64,${shot}"></div>
-<div class="brand">${mark}EM3</div>
 <h1>E3 拉完了，<br>寫個給人用的吧。</h1>
-<p>給陽明交大學生、老師、助教的 E3 客戶端。<br>不用安裝，用原本的 E3 帳號登入。</p>
-<div class="url">e3.emtech.cc</div>
+<p>陽明交大 E3 的客戶端，<br>學生、老師、助教都能用。</p>
+<div class="foot">${mark}EM3<span>e3.emtech.cc</span></div>
+<img class="phone" src="data:image/webp;base64,${phone}">
 </body></html>`);
 await og.evaluate(() => document.fonts.ready);
 await og.waitForTimeout(500);
