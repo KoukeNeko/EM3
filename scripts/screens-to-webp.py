@@ -1,21 +1,73 @@
 #!/usr/bin/env python3
-"""Convert capture-screens.mjs PNGs into web-sized WebP files in public/screens/.
+"""Convert capture-screens.mjs PNGs into WebP files in public/screens/.
 
 Usage: python3 scripts/screens-to-webp.py <png-dir>
+
+Desktop shots (1920×1080 at 2x) are kept at 3840×2160. Phone shots
+(iPhone 17 Pro, 1206×2622) are placed inside scripts/assets/iphone17pro.png,
+whose transparent screen area is used as the mask, then scaled down.
 """
 import os, sys
+from collections import deque
 from PIL import Image
 
-src = sys.argv[1]
-dst = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "public", "screens")
-os.makedirs(dst, exist_ok=True)
-for name in sorted(os.listdir(src)):
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SRC = sys.argv[1]
+DST = os.path.join(ROOT, "public", "screens")
+FRAME = Image.open(os.path.join(ROOT, "scripts", "assets", "iphone17pro.png")).convert("RGBA")
+PHONE_WIDTH = 900
+
+
+def screen_mask(frame):
+    """Flood-fill the see-through screen from its centre; mask = how transparent each pixel is."""
+    w, h = frame.size
+    alpha = frame.getchannel("A")
+    px = alpha.load()
+    mask = Image.new("L", (w, h), 0)
+    mp = mask.load()
+    seen = bytearray(w * h)
+    q = deque([(w // 2, h // 2)])
+    while q:
+        x, y = q.popleft()
+        if x < 0 or y < 0 or x >= w or y >= h or seen[y * w + x]:
+            continue
+        seen[y * w + x] = 1
+        a = px[x, y]
+        if a >= 250:
+            continue
+        mp[x, y] = 255 - a
+        q.extend(((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)))
+    return mask
+
+
+MASK = screen_mask(FRAME)
+BOX = MASK.getbbox()
+
+
+def in_phone(shot):
+    canvas = Image.new("RGBA", FRAME.size, (0, 0, 0, 0))
+    left, top, right, bottom = BOX
+    fitted = shot.convert("RGB").resize((right - left, bottom - top), Image.LANCZOS)
+    layer = Image.new("RGBA", FRAME.size, (0, 0, 0, 0))
+    layer.paste(fitted, (left, top))
+    canvas.paste(layer, (0, 0), MASK)
+    canvas.alpha_composite(FRAME)
+    return canvas
+
+
+os.makedirs(DST, exist_ok=True)
+for name in sorted(os.listdir(SRC)):
     if not name.endswith(".png") or name.startswith("combo"):
         continue
-    im = Image.open(os.path.join(src, name)).convert("RGB")
-    limit = 900 if name.startswith("mobile") else 2400
-    if im.width > limit:
-        im = im.resize((limit, round(im.height * limit / im.width)), Image.LANCZOS)
-    out = os.path.join(dst, name[:-4] + ".webp")
-    im.save(out, "WEBP", quality=82, method=6)
+    im = Image.open(os.path.join(SRC, name))
+    if name.startswith("mobile"):
+        im = in_phone(im)
+        im = im.resize((PHONE_WIDTH, round(im.height * PHONE_WIDTH / im.width)), Image.LANCZOS)
+        lossless = False
+    else:
+        im = im.convert("RGB")
+        if im.width > 3840:
+            im = im.resize((3840, round(im.height * 3840 / im.width)), Image.LANCZOS)
+    out = os.path.join(DST, name[:-4] + ".webp")
+    im.save(out, "WEBP", quality=80, method=6)
     print(f"{out}  {im.width}x{im.height}  {os.path.getsize(out) // 1024} KB")
