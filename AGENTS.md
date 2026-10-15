@@ -36,3 +36,24 @@ PRs should describe the changed area, summarize the user-visible or developer-vi
 If no validation was run, state that explicitly and explain why. Do not claim to have run commands that were not actually executed.
 
 For UI changes that are not easily captured in a screenshot, describe the visual change and any manual checks performed.
+
+## E3 Test Account And Agent Tools
+
+EM3 talks to the real NYCU E3 (`https://e3p.nycu.edu.tw`, Moodle 4.5 mobile web service). A real student account is stored in `.env.local` as `E3_USERNAME` / `E3_PASSWORD`. The file is gitignored; never commit it, print it, or prefix the variables with `VITE_` (that would ship them in the bundle).
+
+The account belongs to a real student, so all automated work must be read-only:
+
+- Never submit, upload, save drafts, post, reply, delete, change preferences (including the E3 language switch and course-list filters), star or hide courses, mark anything read, or start quiz attempts.
+- You may open a submission page or EM3's confirm dialog to inspect it, but never press the final submit.
+- Prefer the web service API over clicking around the E3 web UI; when driving a browser, abort every non-GET request to E3.
+
+Helpers:
+
+- `python3 scripts/e3-ws.py <wsfunction> [key=value ...]` calls a web service function and prints JSON. It only allows read verbs (`get`, `search`, `list`, `check`, `can`, `data`). Array params use Moodle syntax, e.g. `'courseids[0]=25283'`.
+- `NODE_PATH=$(npm root -g) node scripts/shot.mjs <outdir> <width>x<height> <hash-path>...` screenshots EM3 pages signed in as the test account, with state-changing E3 requests aborted. Run `pnpm dev` first. Uses the globally installed Playwright.
+
+Research notes about how E3 is used live in `docs/research/`; design rationale is in `docs/design.md`.
+
+## Deploy
+
+`main` deploys to Cloudflare Workers (static assets) at `https://e3.emtech.cc` via the `deploy` job in `.github/workflows/ci.yml`, which needs the `CLOUDFLARE_API_TOKEN` repository secret. Manual deploy: `pnpm run deploy` (uses `wrangler.jsonc`).
