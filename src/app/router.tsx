@@ -17,12 +17,21 @@ const loginRoute = createRoute({
 	}
 });
 
+const welcomeRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: "/welcome",
+	component: lazyRouteComponent(() => import("@/features/landing/LandingPage"), "LandingPage")
+});
+
 const appRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	id: "app",
 	component: AppShell,
 	beforeLoad: ({ location }) => {
-		if (!useSession.getState().token) throw redirect({ to: "/login", search: { next: location.href } });
+		if (useSession.getState().token) return;
+		// Visitors land on the introduction; deep links go straight to sign-in and come back.
+		if (location.pathname === "/") throw redirect({ to: "/welcome" });
+		throw redirect({ to: "/login", search: { next: location.href } });
 	}
 });
 
@@ -95,6 +104,7 @@ const settingsRoute = createRoute({
 
 const routeTree = rootRoute.addChildren([
 	loginRoute,
+	welcomeRoute,
 	appRoute.addChildren([dashboardRoute, coursesRoute, courseRoute, assignmentRoute, discussionRoute, tasksRoute, announcementsRoute, calendarRoute, timetableRoute, settingsRoute])
 ]);
 

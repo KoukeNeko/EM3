@@ -1,5 +1,5 @@
 import { MoodleError } from "@/lib/moodle/client";
-import { useNavigate, useSearch } from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { ArrowRightIcon, EyeIcon, EyeSlashIcon, LockSimpleIcon, ShieldCheckIcon, UserIcon } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import { type FormEvent, useState } from "react";
@@ -33,7 +33,7 @@ export function LoginPage() {
 	}
 
 	return (
-		<main className="relative grid min-h-dvh place-items-center overflow-hidden bg-base-200 px-4">
+		<main className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-base-200 px-4">
 			<Backdrop />
 			<motion.div
 				initial={{ opacity: 0, y: 24, scale: 0.98 }}
@@ -90,6 +90,9 @@ export function LoginPage() {
 					這是個靜態網頁，密碼不會傳到 EM3 伺服器。
 				</p>
 			</motion.div>
+			<Link to="/welcome" className="relative mt-6 text-sm text-base-content/55 hover:text-base-content">
+				EM3 是什麼？
+			</Link>
 		</main>
 	);
 }

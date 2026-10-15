@@ -3,17 +3,25 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-		<meta name="description" content="EM3 — 更快、更乾淨的 NYCU E3 第三方客戶端" />
+		<meta name="description" content="EM3 是給陽明交大學生的 E3 客戶端：這週要交什麼、這堂課的教材、三步交作業，一打開就看得到。" />
+		<meta property="og:title" content="EM3 — 交大 E3，終於看得懂了" />
+		<meta property="og:description" content="給陽明交大學生的開源 E3 客戶端。" />
+		<meta property="og:image" content="https://e3.emtech.cc/screens/dashboard-light.webp" />
+		<meta property="og:url" content="https://e3.emtech.cc/" />
+		<meta name="twitter:card" content="summary_large_image" />
 		<meta name="color-scheme" content="light dark" />
 		<link rel="icon" type="image/svg+xml" href="./favicon.svg" />
 		<meta name="theme-color" content="#C4A7E7" />
 		<title>EM3</title>
 		<script>
-			// Apply the saved theme before first paint to avoid a flash.
+			// Apply the saved theme (and whether it is dark) before first paint to avoid a flash.
 			try {
 				var s = JSON.parse(localStorage.getItem("em3:prefs") || "{}");
-				var t = s && s.state && s.state.theme;
-				if (t && t !== "system") document.documentElement.setAttribute("data-theme", t);
+				var t = (s && s.state && s.state.theme) || "system";
+				var darkThemes = "em3-dark dark synthwave halloween forest aqua black luxury dracula business night coffee dim sunset abyss".split(" ");
+				if (t !== "system") document.documentElement.setAttribute("data-theme", t);
+				var dark = t === "system" ? matchMedia("(prefers-color-scheme: dark)").matches : darkThemes.indexOf(t) >= 0;
+				document.documentElement.setAttribute("data-scheme", dark ? "dark" : "light");
 			} catch (e) {}
 		</script>
 	</head>

@@ -122,6 +122,12 @@
 		0 8px 24px -12px color-mix(in oklab, var(--color-base-content) 10%, transparent);
 }
 
+/* Screenshots ship in light and dark; show the one matching the active theme. */
+[data-scheme="dark"] .shot-light,
+:root:not([data-scheme="dark"]) .shot-dark {
+	display: none;
+}
+
 @utility hairline {
 	border-color: color-mix(in oklab, var(--color-base-content) 8%, transparent);
 }
