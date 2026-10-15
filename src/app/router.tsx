@@ -30,8 +30,8 @@ const appRoute = createRoute({
 	component: AppShell,
 	beforeLoad: ({ location }) => {
 		if (useSession.getState().token) return;
-		// Visitors land on the introduction; deep links go straight to sign-in and come back.
-		if (location.pathname === "/") throw redirect({ to: "/welcome" });
+		// Visitors land on the introduction; deep links and the installed app go straight to sign-in.
+		if (location.pathname === "/" && !matchMedia("(display-mode: standalone)").matches) throw redirect({ to: "/welcome" });
 		throw redirect({ to: "/login", search: { next: location.href } });
 	}
 });

@@ -3,6 +3,7 @@ import { router } from "@/app/router";
 import { ThemeSync } from "@/app/ThemeSync";
 import { useSession } from "@/features/auth/session";
 import { setAuthLostHandler } from "@/lib/moodle/client";
+import "@/shared/pwa/install";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
@@ -24,3 +25,7 @@ createRoot(document.getElementById("root")!).render(
 		</PersistQueryClientProvider>
 	</StrictMode>
 );
+
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+	window.addEventListener("load", () => void navigator.serviceWorker.register("./sw.js").catch(() => {}));
+}

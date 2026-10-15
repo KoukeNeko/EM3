@@ -133,6 +133,8 @@ E3 的「教材」其實是資料夾，而大部分資料夾裡只有一份投�
 
 打開 [e3.emtech.cc](https://e3.emtech.cc)，用原本的 E3 學號和密碼登入，不用安裝任何東西。
 
+想要像 App 一樣從主畫面打開，可以把它裝起來：iPhone 用 Safari 的「分享 → 加入主畫面」，Chrome 和 Edge 點網址列的安裝按鈕，或到 EM3 的「設定 → App」。裝好後會在自己的視窗打開，沒有網路時也看得到上次載入的內容。
+
 如果 EM3 讓你少遲交了一次作業，請到 [GitHub](https://github.com/elvisdragonmao/EM3) 按一顆 ⭐，讓更多同學找到它。發現問題或有想要的功能，歡迎開 [issue](https://github.com/elvisdragonmao/EM3/issues)。
 
 ## 隱私
@@ -199,6 +201,14 @@ python3 scripts/screens-to-webp.py /tmp/em3-screens
 ```
 
 需要 `.env.local` 裡的 `E3_USERNAME` / `E3_PASSWORD`，以及全域安裝的 Playwright。桌機截圖是 1920×1080 的 2 倍；手機截圖用 iPhone 17 Pro 的尺寸（402×874 @3x）拍，再合成進 `scripts/assets/iphone17pro.png` 的外框。
+
+### 更新圖示與分享圖
+
+```sh
+NODE_PATH=$(npm root -g) node scripts/make-brand.mjs
+```
+
+從 `src/shared/ui/Logo.tsx` 的 logo 畫出 favicon、App 圖示和 `public/og.jpg`（分享預覽圖，會用到 `public/screens/dashboard-light.webp`）。改了 logo、首頁標題或首頁截圖之後要重跑。
 
 ## 授權
 

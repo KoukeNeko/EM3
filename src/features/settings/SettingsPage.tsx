@@ -2,9 +2,10 @@ import { idbPersister, queryClient } from "@/app/queryClient";
 import { useSession } from "@/features/auth/session";
 import { useSiteInfo } from "@/features/courses/api";
 import { type CalendarSpan, exportPrefs, importPrefs, usePrefs } from "@/features/preferences/store";
+import { isIos, isStandalone, useInstallPrompt } from "@/shared/pwa/install";
 import { Avatar } from "@/shared/ui/Avatar";
 import { PageTitle } from "@/shared/ui/States";
-import { ArrowsClockwiseIcon, CheckIcon, DesktopIcon, DownloadSimpleIcon, SignOutIcon, TrashIcon, UploadSimpleIcon } from "@phosphor-icons/react";
+import { ArrowsClockwiseIcon, CheckIcon, DesktopIcon, DeviceMobileIcon, DownloadSimpleIcon, ExportIcon, SignOutIcon, TrashIcon, UploadSimpleIcon } from "@phosphor-icons/react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { type ReactNode, useRef, useState } from "react";
@@ -136,6 +137,10 @@ export function SettingsPage() {
 				</div>
 			</Section>
 
+			<Section title="App" desc="把 EM3 裝到主畫面或 Dock，會在自己的視窗打開；沒有網路時也能看上次載入的內容。">
+				<InstallApp />
+			</Section>
+
 			<Section title="資料" desc="匯出成 JSON 備份，或帶到另一台電腦。檔案內容只有 EM3 的設定，沒有密碼或登入憑證。">
 				<div className="flex flex-wrap gap-2">
 					<button className="btn btn-sm" onClick={download}>
@@ -224,4 +229,30 @@ function ThemeCard({ name, label, info, active, onPick }: { name: string; label?
 			</div>
 		</button>
 	);
+}
+
+function InstallApp() {
+	const install = useInstallPrompt();
+	if (isStandalone())
+		return (
+			<p className="flex items-center gap-2 text-sm text-base-content/70">
+				<CheckIcon size={16} className="text-success" />
+				你現在用的就是安裝好的 App。
+			</p>
+		);
+	if (install)
+		return (
+			<button className="btn btn-sm btn-primary" onClick={install}>
+				<DeviceMobileIcon size={16} />
+				安裝 EM3
+			</button>
+		);
+	if (isIos())
+		return (
+			<p className="text-sm leading-relaxed text-base-content/70">
+				用 Safari 打開這一頁，點下方的分享按鈕 <ExportIcon size={15} className="inline align-[-2px]" />
+				，再選「加入主畫面」。
+			</p>
+		);
+	return <p className="text-sm leading-relaxed text-base-content/70">用瀏覽器選單裡的「安裝 EM3」或「加入主畫面」。Firefox 桌面版不支援安裝。</p>;
 }
