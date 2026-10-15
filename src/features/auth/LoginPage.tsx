@@ -87,7 +87,7 @@ export function LoginPage() {
 
 				<p className="mt-6 flex gap-2 text-xs leading-relaxed text-base-content/55">
 					<ShieldCheckIcon size={16} className="mt-0.5 shrink-0" />
-					密碼只會直接送到 e3p.nycu.edu.tw 換取登入憑證，EM3 不會保存你的密碼；憑證存在這個瀏覽器的 cookie 裡。
+					這是個靜態網頁，密碼不會傳到 EM3 伺服器。
 				</p>
 			</motion.div>
 		</main>
