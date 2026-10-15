@@ -92,6 +92,12 @@
 		@apply bg-base-200 font-sans;
 		font-feature-settings: "ss01", "cv11";
 	}
+	/* Tailwind 4's preflight resets buttons to the default cursor. */
+	button:not(:disabled),
+	[role="button"]:not([aria-disabled="true"]),
+	summary {
+		cursor: pointer;
+	}
 	:focus-visible {
 		outline: 2px solid var(--color-primary);
 		outline-offset: 2px;
