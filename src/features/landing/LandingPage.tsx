@@ -149,13 +149,13 @@ export function LandingPage() {
 						transition={{ type: "spring", stiffness: 120, damping: 20 }}
 						className="text-[3.2rem] leading-[1.02] font-black tracking-tight sm:text-7xl lg:text-[6.5rem]"
 					>
-						交大 E3 拉完了，
+						E3 拉完了，
 						<br />
 						寫個給人用的吧。
 					</motion.h1>
 					<motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 120, damping: 20, delay: 0.08 }}>
 						<p className="mt-8 max-w-2xl text-lg leading-relaxed text-base-content/70 sm:text-xl">
-							EM3 是給人用的 E3 客戶端，設計給無論是老師還是學生。打開就知道這週要交什麼、現在這堂課的投影片在哪，作業拖進來就交。不用安裝，用原本的 E3 帳號登入。
+							EM3 是陽明交大課務系統 E3 的客戶端，設計給無論是老師還是學生。打開就知道這週要交什麼、現在這堂課的投影片在哪，作業拖進來就交。不用安裝，用原本的 E3 帳號登入。
 						</p>
 						<div className="mt-10 flex flex-wrap gap-3">
 							{cta}
