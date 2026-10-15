@@ -33,3 +33,46 @@
 	min-height: var(--em3-editor-min, 10rem);
 	outline: none;
 }
+
+/* Crepe's top bar is sized for a full-width page; tighten it so it fits a side column in one or two rows. */
+.em3-editor .milkdown .milkdown-top-bar {
+	padding: 2px 6px;
+	min-height: 0;
+}
+.em3-editor .milkdown .milkdown-top-bar .top-bar-item {
+	width: 28px;
+	height: 28px;
+	margin: 1px;
+	padding: 5px;
+	border-radius: 6px;
+}
+.em3-editor .milkdown .milkdown-top-bar .top-bar-item svg {
+	width: 18px;
+	height: 18px;
+	color: var(--crepe-color-on-surface-variant);
+	fill: var(--crepe-color-on-surface-variant);
+}
+.em3-editor .milkdown .milkdown-top-bar .top-bar-divider {
+	height: 16px;
+	margin: 0 4px;
+}
+.em3-editor .milkdown .milkdown-top-bar .top-bar-heading-selector {
+	padding: 1px;
+}
+.em3-editor .milkdown .milkdown-top-bar .top-bar-heading-button {
+	height: 28px;
+	padding: 2px 2px 2px 8px;
+	border-radius: 6px;
+}
+.em3-editor .milkdown .milkdown-top-bar .top-bar-heading-button .top-bar-heading-label {
+	font-size: 13px;
+	min-width: 4.5rem;
+}
+.em3-editor .milkdown .milkdown-top-bar .top-bar-heading-button .top-bar-chevron {
+	width: 18px;
+	height: 18px;
+}
+.em3-editor .milkdown .milkdown-top-bar .top-bar-heading-button .top-bar-chevron svg {
+	width: 14px;
+	height: 14px;
+}
