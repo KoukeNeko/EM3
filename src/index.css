@@ -1,0 +1,204 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+	themes: all;
+	logs: false;
+}
+
+/* EM3's own theme pair: quiet neutrals, one confident blue, soft radii. */
+@plugin "daisyui/theme" {
+	name: "em3";
+	default: true;
+	prefersdark: false;
+	color-scheme: light;
+	--color-base-100: oklch(99.2% 0.002 260);
+	--color-base-200: oklch(96.8% 0.004 260);
+	--color-base-300: oklch(92.5% 0.006 260);
+	--color-base-content: oklch(22% 0.012 260);
+	--color-primary: oklch(54% 0.17 296);
+	--color-primary-content: oklch(99% 0.005 296);
+	--color-secondary: oklch(80% 0.12 70);
+	--color-secondary-content: oklch(28% 0.06 70);
+	--color-accent: oklch(72% 0.13 200);
+	--color-accent-content: oklch(20% 0.04 200);
+	--color-neutral: oklch(28% 0.012 260);
+	--color-neutral-content: oklch(97% 0.004 260);
+	--color-info: oklch(68% 0.15 235);
+	--color-info-content: oklch(99% 0.01 235);
+	--color-success: oklch(66% 0.17 150);
+	--color-success-content: oklch(99% 0.01 150);
+	--color-warning: oklch(80% 0.16 75);
+	--color-warning-content: oklch(25% 0.05 75);
+	--color-error: oklch(62% 0.22 25);
+	--color-error-content: oklch(99% 0.01 25);
+	--radius-selector: 1rem;
+	--radius-field: 0.5rem;
+	--radius-box: 1rem;
+	--size-selector: 0.25rem;
+	--size-field: 0.25rem;
+	--border: 1px;
+	--depth: 0;
+	--noise: 0;
+}
+
+@plugin "daisyui/theme" {
+	name: "em3-dark";
+	default: false;
+	prefersdark: true;
+	color-scheme: dark;
+	--color-base-100: oklch(18% 0.006 260);
+	--color-base-200: oklch(15% 0.006 260);
+	--color-base-300: oklch(25% 0.008 260);
+	--color-base-content: oklch(94% 0.005 260);
+	--color-primary: oklch(76% 0.11 300);
+	--color-primary-content: oklch(18% 0.04 300);
+	--color-secondary: oklch(83% 0.11 72);
+	--color-secondary-content: oklch(20% 0.05 72);
+	--color-accent: oklch(78% 0.11 200);
+	--color-accent-content: oklch(18% 0.04 200);
+	--color-neutral: oklch(30% 0.01 260);
+	--color-neutral-content: oklch(94% 0.005 260);
+	--color-info: oklch(72% 0.14 235);
+	--color-info-content: oklch(16% 0.03 235);
+	--color-success: oklch(72% 0.16 150);
+	--color-success-content: oklch(16% 0.03 150);
+	--color-warning: oklch(82% 0.15 75);
+	--color-warning-content: oklch(20% 0.04 75);
+	--color-error: oklch(68% 0.2 25);
+	--color-error-content: oklch(16% 0.03 25);
+	--radius-selector: 1rem;
+	--radius-field: 0.5rem;
+	--radius-box: 1rem;
+	--size-selector: 0.25rem;
+	--size-field: 0.25rem;
+	--border: 1px;
+	--depth: 0;
+	--noise: 0;
+}
+
+@theme {
+	--font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", "Segoe UI", system-ui, sans-serif;
+	--font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+	--ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@layer base {
+	html {
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		text-rendering: optimizeLegibility;
+		-webkit-tap-highlight-color: transparent;
+	}
+	body {
+		@apply bg-base-200 font-sans;
+		font-feature-settings: "ss01", "cv11";
+	}
+	:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
+	}
+	/* daisyUI's .input wrapper already draws the focus ring for the field inside it. */
+	.input :focus-visible {
+		outline: none;
+	}
+	::selection {
+		background: color-mix(in oklab, var(--color-primary) 28%, transparent);
+	}
+}
+
+/* Surfaces: frosted glass panels with a hairline border, used for the shell. */
+@utility surface {
+	background: color-mix(in oklab, var(--color-base-100) 82%, transparent);
+	backdrop-filter: saturate(1.6) blur(20px);
+	-webkit-backdrop-filter: saturate(1.6) blur(20px);
+	border: 1px solid color-mix(in oklab, var(--color-base-content) 8%, transparent);
+}
+
+@utility card-quiet {
+	background: var(--color-base-100);
+	border: 1px solid color-mix(in oklab, var(--color-base-content) 7%, transparent);
+	border-radius: var(--radius-box);
+	box-shadow:
+		0 1px 2px color-mix(in oklab, var(--color-base-content) 4%, transparent),
+		0 8px 24px -12px color-mix(in oklab, var(--color-base-content) 10%, transparent);
+}
+
+@utility hairline {
+	border-color: color-mix(in oklab, var(--color-base-content) 8%, transparent);
+}
+
+@utility scrollbar-none {
+	scrollbar-width: none;
+	&::-webkit-scrollbar {
+		display: none;
+	}
+}
+
+/* Rendered E3 HTML (announcements, assignment intros). */
+@utility prose-e3 {
+	line-height: 1.75;
+	overflow-wrap: anywhere;
+	& p,
+	& ul,
+	& ol,
+	& table,
+	& pre,
+	& blockquote {
+		margin-block: 0.6em;
+	}
+	& a {
+		color: var(--color-primary);
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+	& ul {
+		list-style: disc;
+		padding-inline-start: 1.4em;
+	}
+	& ol {
+		list-style: decimal;
+		padding-inline-start: 1.4em;
+	}
+	& img,
+	& video,
+	& iframe {
+		max-width: 100%;
+		height: auto;
+		border-radius: 0.5rem;
+	}
+	& table {
+		display: block;
+		overflow-x: auto;
+		border-collapse: collapse;
+	}
+	& td,
+	& th {
+		border: 1px solid color-mix(in oklab, var(--color-base-content) 12%, transparent);
+		padding: 0.35em 0.6em;
+	}
+	& h1,
+	& h2,
+	& h3,
+	& h4 {
+		font-weight: 600;
+		margin-block: 0.8em 0.4em;
+	}
+	& pre,
+	& code {
+		font-family: var(--font-mono);
+		font-size: 0.9em;
+	}
+	& pre {
+		background: var(--color-base-200);
+		padding: 0.8em;
+		border-radius: 0.5rem;
+		overflow-x: auto;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		scroll-behavior: auto !important;
+	}
+}
