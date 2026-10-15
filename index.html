@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<meta name="description" content="EM3 — 更快、更乾淨的 NYCU E3 第三方客戶端" />
+		<meta name="color-scheme" content="light dark" />
+		<link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+		<meta name="theme-color" content="#C4A7E7" />
+		<title>EM3</title>
+		<script>
+			// Apply the saved theme before first paint to avoid a flash.
+			try {
+				var s = JSON.parse(localStorage.getItem("em3:prefs") || "{}");
+				var t = s && s.state && s.state.theme;
+				if (t && t !== "system") document.documentElement.setAttribute("data-theme", t);
+			} catch (e) {}
+		</script>
+	</head>
+	<body>
+		<div id="root"></div>
+		<script type="module" src="/src/main.tsx"></script>
+	</body>
+</html>

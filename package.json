@@ -1,20 +1,44 @@
 {
-	"name": "project",
+	"name": "em3",
+	"version": "0.1.0",
+	"private": true,
 	"type": "module",
 	"scripts": {
-		"astro": "astro",
-		"build": "astro build",
-		"dev": "astro dev",
+		"build": "tsc -b && vite build",
+		"deploy": "pnpm build && npx --yes wrangler@4 deploy",
+		"dev": "vite",
 		"format": "prettier --write .",
+		"format:check": "prettier --check .",
 		"preinstall": "npx only-allow pnpm",
 		"prepare": "sh -c 'if command -v git >/dev/null 2>&1 && git rev-parse --is-inside-work-tree >/dev/null 2>&1; then git config core.hooksPath .githooks; fi'",
-		"preview": "astro preview",
-		"test": "astro check"
+		"preview": "vite preview",
+		"test": "tsc -b"
+	},
+	"dependencies": {
+		"@phosphor-icons/react": "^2.1.10",
+		"@tanstack/react-query": "^5.104.2",
+		"@tanstack/react-query-persist-client": "^5.104.2",
+		"@tanstack/react-router": "^1.170.44",
+		"dompurify": "^3.4.17",
+		"idb-keyval": "^6.3.0",
+		"motion": "^14.2.0",
+		"react": "^19.3.0",
+		"react-dom": "^19.3.0",
+		"zustand": "^5.0.15"
 	},
 	"devDependencies": {
+		"@tailwindcss/vite": "^4.3.3",
+		"@types/node": "^26.6.5",
+		"@types/react": "^19.3.0",
+		"@types/react-dom": "^19.3.0",
+		"@vitejs/plugin-react": "^6.1.2",
+		"daisyui": "^5.7.50",
 		"prettier": "^3.9.10",
 		"prettier-plugin-organize-imports": "^4.3.0",
-		"prettier-plugin-packagejson": "^3.0.2"
+		"prettier-plugin-packagejson": "^3.0.2",
+		"tailwindcss": "^4.3.3",
+		"typescript": "^7.0.2",
+		"vite": "^8.3.4"
 	},
 	"packageManager": "pnpm@12.11.2+sha512.25a51652a196785af5f28bda6dfe8dc582ebefa4ac1d180221ce1390231c5fb76637822ea4b6e4633ce74acdcb0a77f725af11bad38177fdeddaee818a955cb9"
 }
