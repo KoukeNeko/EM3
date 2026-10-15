@@ -149,9 +149,9 @@ export function LandingPage() {
 						transition={{ type: "spring", stiffness: 120, damping: 20 }}
 						className="text-[3.2rem] leading-[1.02] font-black tracking-tight sm:text-7xl lg:text-[6.5rem]"
 					>
-						交大 E3，
+						交大 E3 拉完了，
 						<br />
-						拉完了。
+						寫個給人用的吧。
 					</motion.h1>
 					<motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 120, damping: 20, delay: 0.08 }}>
 						<p className="mt-8 max-w-2xl text-lg leading-relaxed text-base-content/70 sm:text-xl">
@@ -179,7 +179,7 @@ export function LandingPage() {
 						</motion.h2>
 						<motion.div {...reveal} className="space-y-4 text-[1.05rem] leading-relaxed text-base-content/70 lg:col-span-7">
 							<p>原本的 E3 首頁要往下捲整個畫面，才看得到沒有課名的「未來事件」。EM3 的第一個畫面就是這週：哪門課、交了沒、還剩多久。</p>
-							<p>設定好課表之後，正在上的那堂課會放在最上面，還有幾分鐘下課、教材、作業、公告，都在一步之內。</p>
+							<p>設定好課表之後，正在上的那堂課會放在最上面，還有幾分鐘下課、教材、作業、公告，一目瞭然。</p>
 						</motion.div>
 					</section>
 
@@ -229,7 +229,7 @@ export function LandingPage() {
 						}
 						shot={<Shot name="submit" alt="EM3 作業頁：拖放檔案後按繳交" />}
 					>
-						<p>沒有維基圖庫、沒有授權條款下拉選單、沒有「儲存更改」。允許的檔案類型寫在拖放區裡，選錯當場就會提醒。</p>
+						<p>沒有沒人用的維基圖庫、沒有授權條款下拉選單、沒有「儲存更改」。允許的檔案類型寫在拖放區裡，選錯當場就會提醒。</p>
 						<p>按下繳交前會列出 E3 上最後會有哪些檔案；逾期的話也會先告訴你。</p>
 					</Feature>
 
@@ -238,7 +238,7 @@ export function LandingPage() {
 							<>
 								學期過了，
 								<br />
-								課程就不見了
+								課程就不見
 								<br />
 								是三小。
 							</>
@@ -253,9 +253,9 @@ export function LandingPage() {
 						flip
 						title={
 							<>
-								知道你現在
+								知道你在哪堂課
 								<br />
-								在上哪堂課
+								快速獲得資源
 							</>
 						}
 						shot={<Shot name="timetable" alt="EM3 課表編輯器" />}
@@ -270,7 +270,6 @@ export function LandingPage() {
 							一樣拉完了。
 						</motion.h2>
 						<motion.div {...reveal} className="space-y-4 text-[1.05rem] leading-relaxed text-base-content/70 lg:col-span-6">
-							<p>我們模擬訪談了五位老師、五位助教，從 150 人的必修大班到一週來一天的兼任講師。十個人的第一名都一樣：改作業。</p>
 							<p>評分表在 1920 寬的螢幕上一列都塞不下；下載全部的資料夾用的是對不回學號的「參與者編號」；有四份選課已失效的學生交的作業，根本不在評分表裡。</p>
 						</motion.div>
 					</section>
@@ -292,9 +291,9 @@ export function LandingPage() {
 					<section className="space-y-10">
 						<motion.div {...reveal} className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-16">
 							<h2 className="text-3xl leading-tight font-bold tracking-tight sm:text-4xl lg:col-span-5">
-								出題要 136 個欄位，
+								出題有 136 個欄位，
 								<br />
-								是在哈囉？
+								是在開飛機？
 							</h2>
 							<div className="space-y-4 text-[1.05rem] leading-relaxed text-base-content/70 lg:col-span-7">
 								<p>在 EM3 打題目，或直接從 Excel 貼上，下載 Moodle XML 丟進 E3 題庫，一份小考從一百多次點擊變成幾分鐘。</p>

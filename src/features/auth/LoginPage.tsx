@@ -45,7 +45,7 @@ export function LoginPage() {
 					<Logo size={52} />
 					<div>
 						<h1 className="text-xl font-semibold tracking-tight">EM3</h1>
-						<p className="text-sm text-base-content/60">更快、更清楚的交大 E3</p>
+						<p className="text-sm text-base-content/60">更快、更人類的交大 E3</p>
 					</div>
 				</div>
 
