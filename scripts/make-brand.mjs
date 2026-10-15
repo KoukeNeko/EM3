@@ -73,11 +73,11 @@ await og.setContent(`<!doctype html><html><head>
 <style>
 *{box-sizing:border-box;margin:0}
 body{width:1200px;height:630px;overflow:hidden;position:relative;background:#141417;color:#f3f3f5;font-family:"MiSansTC","MiSans TC",sans-serif}
-h1{position:absolute;left:72px;top:96px;font-size:92px;line-height:1.1;font-weight:900;letter-spacing:-0.03em}
-p{position:absolute;left:76px;top:330px;font-size:27px;line-height:1.55;color:#9d9da6}
+h1{position:absolute;left:72px;top:120px;font-size:88px;line-height:1.1;font-weight:900;letter-spacing:-0.03em}
+p{position:absolute;left:76px;top:350px;font-size:27px;line-height:1.55;color:#9d9da6}
 .foot{position:absolute;left:72px;bottom:64px;display:flex;align-items:center;gap:14px;font-size:26px;font-weight:600}
 .foot span{color:#7d7d86;font-weight:400}
-.phone{position:absolute;left:812px;top:56px;width:350px}
+.phone{position:absolute;right:71px;top:56px;width:350px}
 </style></head><body>
 <h1>E3 拉完了，<br>寫個給人用的吧。</h1>
 <p>陽明交大 E3 的客戶端，<br>學生、老師、助教都能用。</p>
