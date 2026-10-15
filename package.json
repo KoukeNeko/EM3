@@ -15,12 +15,16 @@
 		"test": "tsc -b"
 	},
 	"dependencies": {
+		"@milkdown/crepe": "^7.22.3",
+		"@milkdown/kit": "^7.22.3",
 		"@phosphor-icons/react": "^2.1.10",
 		"@tanstack/react-query": "^5.104.2",
 		"@tanstack/react-query-persist-client": "^5.104.2",
 		"@tanstack/react-router": "^1.170.44",
 		"dompurify": "^3.4.17",
+		"fflate": "^0.8.3",
 		"idb-keyval": "^6.3.0",
+		"marked": "^18.1.1",
 		"motion": "^14.2.0",
 		"react": "^19.3.0",
 		"react-dom": "^19.3.0",
