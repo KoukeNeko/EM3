@@ -88,7 +88,7 @@ E3 沒有上課時間，課程綱要系統的 API 又送出重複的 `Access-Con
 
 - **動畫**：motion 的 spring（stiffness 380、damping 34）。分頁指示器與側欄選取狀態用 `layoutId` 平滑移動；行事曆切換時依方向滑動；列表依序浮現；預覽面板從右側滑入。設定裡可以減少動畫，也會跟隨系統的 `prefers-reduced-motion`。
 - **主題**：daisyUI 5 的 35 個內建主題，加上 EM3 自己的淺色和深色主題，主色取自 logo 的紫色與琥珀色。預設跟隨系統的深淺色。
-- **字型**：系統字型堆疊（SF / PingFang TC / Noto Sans TC / 微軟正黑體）。
+- **字型**：MiSans TC，從 `font.emtech.cc` 載入；載入前或失敗時用系統的 sans-serif。
 - **圖示**：Phosphor Icons。導覽列選取時用 fill，課程圖示用 duotone。
 
 ## 鍵盤與無障礙

@@ -76,7 +76,7 @@
 }
 
 @theme {
-	--font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", "Segoe UI", system-ui, sans-serif;
+	--font-sans: "MiSansTC", "MiSans TC", sans-serif;
 	--font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
 	--ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
 }
