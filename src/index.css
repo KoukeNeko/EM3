@@ -214,3 +214,15 @@
 		scroll-behavior: auto !important;
 	}
 }
+
+/* One focus style for every text field: daisyUI's offset outline reads as a
+   double white border on dark themes, and the Milkdown editor can't use it. */
+.input:focus,
+.input:focus-within,
+.textarea:focus,
+.select:focus,
+.em3-editor:focus-within {
+	outline: none;
+	border-color: color-mix(in oklab, var(--color-primary) 55%, transparent);
+	box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 16%, transparent);
+}

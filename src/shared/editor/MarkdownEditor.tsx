@@ -41,7 +41,7 @@ export function MarkdownEditor({ value, onChange, placeholder = "開始輸入…
 	};
 
 	return (
-		<div className="em3-editor @container overflow-hidden rounded-box border hairline bg-base-100 focus-within:border-primary/50" style={{ ["--em3-editor-min" as string]: minHeight }}>
+		<div className="em3-editor @container overflow-hidden rounded-box border hairline bg-base-100 transition-[border-color,box-shadow]" style={{ ["--em3-editor-min" as string]: minHeight }}>
 			<div className="flex items-center gap-1 border-b hairline px-2 py-1.5" role="tablist" aria-label={`${label}編輯方式`}>
 				<button type="button" role="tab" aria-selected={mode === "rich"} onClick={() => switchMode("rich")} className={`btn btn-xs ${mode === "rich" ? "btn-active" : "btn-ghost"}`}>
 					<TextAaIcon size={14} />
