@@ -1,103 +1,75 @@
 <div align=center>
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://elvismao.com/logo.svg">
-  <source media="(prefers-color-scheme: light)" srcset="https://elvismao.com/logo-black.svg">
-  <img alt="EM Logo" src="https://elvismao.com/logo.svg" width="50"/>
-</picture>
+<img alt="EM3" src="public/favicon.svg" width="72"/>
 
-# utils
+# EM3
 
-一些常用的複製貼上好工具
+更快、更清楚的陽明交大 E3 客戶端
 
 </div>
 
-文件裡面有：
+EM3 是 [NYCU E3](https://e3p.nycu.edu.tw/) 的非官方第三方客戶端：一個純靜態的 React SPA，直接在瀏覽器裡呼叫 E3（Moodle 4.5）的行動版 Web Service API，沒有中間伺服器。
 
-- 常用 gitignore
-- 常用 Actions
-- 我的 .prettierrc
-- 我常用的 License：Apache-2.0 跟 [你他媽的想幹嘛就幹嘛公眾授權條款](LICENSE)
+- **今天**：這堂課、這週要交的東西、新教材、新公告，一頁看完。
+- **時間講人話**：「昨天 星期三」「10/5 上星期五」「明天 星期四 23:59」，`00:00` 截止顯示成前一天 24:00。
+- **課表**：知道你現在在上哪堂課，把它放在最前面。
+- **教材**：攤平只有一個檔案的資料夾，PDF 直接在 App 裡預覽。
+- **繳交**：拖檔案、確認、繳交，三步完成。
+- **課程**：依學期篩選，每門課可以自訂顏色、圖示和簡稱。
+- **主題**：daisyUI 全部主題加上 EM3 自己的深淺色主題；設定可以匯出成 JSON。
 
-## 環境
+設計理由見 [docs/design.md](docs/design.md)，使用者研究見 [docs/research/](docs/research/README.md)。
 
-### 安裝 Node.js
+## 開發
 
-請參考 [Node.js 官方網站](https://nodejs.org/zh-tw/download/) 下載並安裝適合您作業系統的版本。建議使用 nvm 安裝。
-
-### 安裝 pnpm
-
-```sh
-npm install --global corepack@latest
-corepack enable pnpm
-```
-
-> 更新 pnpm 時，請執行：  
-> `corepack prepare pnpm@latest --activate`
-
-## 建立專案
-
-### 鎖定專案 pnpm 版本
+需要 Node.js 24 以上與 pnpm。
 
 ```sh
-corepack use pnpm@latest
+pnpm install
+pnpm dev          # http://localhost:5173
+pnpm build        # 輸出到 dist/
+pnpm preview
+pnpm format       # Prettier
+pnpm test         # TypeScript 型別檢查
 ```
 
-### Prettier
+技術：React 19、Vite、TypeScript、Tailwind CSS 4、daisyUI 5、TanStack Query、TanStack Router（hash history）、Zustand、motion、Phosphor Icons。
 
-```sh
-pnpm add -D prettier prettier-plugin-organize-imports prettier-plugin-packagejson
+### 專案結構
+
+功能導向，每個 feature 自己擁有頁面、元件與資料存取：
+
+```
+src/
+  app/            路由、App 外殼、Query client、主題同步
+  lib/moodle/     E3 Web Service client、型別、檔案 URL 與 HTML 處理
+  lib/time/       相對時間與截止時間的寫法
+  shared/         共用 UI（快速跳轉、時間、狀態、Logo）與 hooks
+  features/
+    auth/         登入、token cookie
+    dashboard/    今天
+    assignments/  待辦、作業頁、繳交
+    announcements/ 公告收件匣、單篇公告
+    calendar/     行事曆
+    courses/      課程列表、課名解析、顏色與圖示
+    course/       課程頁（教材、作業、公告、成績）、檔案預覽
+    timetable/    課表與節次
+    preferences/  localStorage 設定
+    settings/     設定頁、主題清單
 ```
 
-### [Astro](https://docs.astro.build/zh-tw/install-and-setup/)
+## 部署
 
-```sh
-pnpm create astro@latest
-pnpm add -D prettier-plugin-astro
-```
+`dist/` 是純靜態檔案，用相對路徑與 hash 路由，可以放在任何靜態主機上：GitHub Pages（`.github/workflows/deploy.yml`）、Cloudflare Workers Assets（`wrangler.jsonc`），或任何子路徑。
 
-### React
+E3 的 `login/token.php`、`webservice/rest/server.php`、`webservice/upload.php`、`webservice/pluginfile.php` 都回應 `Access-Control-Allow-Origin: *`，所以不需要 proxy。
 
-```sh
-pnpm create vite@latest ./ --template react-ts
-```
+## 隱私
 
-### 其他套件
-
-```sh
-pnpm add lenis
-```
-
-## Git 操作
-
-### 部落格寫過的爛事
-
-- [如何更改已經 push 的 commit message](https://emtech.cc/p/git-reword/)
-- [Git force push orphan branch 其他人不能 pull 怎麼辦？](https://emtech.cc/p/git-pull-orphan/)
-- [如何把 Merge 地獄整理成乾淨的 Commit](https://emtech.cc/p/git-merge-clean/)
-- [你們為什麼就不能全域 .gitignore .DS_Store 呢？](https://emtech.cc/p/git-dsstore/)
-- [如何設定 VSCode Git pull 使用 rebase 而不是 merge](https://emtech.cc/p/vscode-git-pull/)
-- [GitHub 如何更改預設分支 (default branch)](https://emtech.cc/p/git-default-branch/)
-- [啊我剛才 push 錯了！如何在 Git 中撤銷提交](https://emtech.cc/p/git-revert/)
-
-### 有人亂 push package-lock.json
-
-```sh
-git rm --cached package-lock.json
-rm package-lock.json
-git add .gitignore
-git commit -m "chore: remove package-lock.json and ignore it"
-git push
-```
-
-### 檢查看 core.hooksPath 是否設定成功
-
-```bash
-git config --show-origin --get core.hooksPath
-```
+- 密碼只用來向 `e3p.nycu.edu.tw/login/token.php` 換取 token，不會儲存。
+- token 存在這個網站的 cookie；個人設定存在 `localStorage`；E3 回應快取在 IndexedDB，登出時清除。
+- 公告的已讀狀態只記在本地，不會在 E3 上標記已讀。
 
 ## 授權條款
 
-本專案採用[你他媽的想幹嘛就幹嘛公眾授權條款](https://www.wtfpl.net/)授權，詳情請參閱 [LICENSE](./LICENSE) 檔案。
-
-![](https://www.wtfpl.net/wp-content/uploads/2012/12/wtfpl-badge-1.png)
+本專案採用 Apache License 2.0 授權，詳情請參閱 [LICENSE](./LICENSE) 檔案。
