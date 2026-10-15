@@ -111,7 +111,10 @@ export function CoursePage() {
 				</div>
 			</header>
 
-			<nav className="sticky top-[3.25rem] z-20 -mx-4 mb-6 border-b hairline bg-base-200/80 px-4 backdrop-blur-xl sm:mx-0 sm:px-0 lg:top-0" aria-label="課程分頁">
+			<nav
+				className="sticky top-[3.25rem] z-20 -mx-4 mb-6 border-b hairline bg-base-200/80 px-4 backdrop-blur-xl sm:mx-0 sm:rounded-2xl sm:border sm:bg-base-100/80 sm:px-1.5 sm:shadow-sm lg:top-3"
+				aria-label="課程分頁"
+			>
 				<div
 					role="tablist"
 					className="flex gap-1 overflow-x-auto scrollbar-none"
@@ -139,7 +142,7 @@ export function CoursePage() {
 							>
 								<t.icon size={17} weight={active ? "fill" : "regular"} style={active ? { color: look.color } : undefined} />
 								{t.label}
-								{active && <motion.span layoutId="course-tab" className="absolute inset-x-2 -bottom-px h-0.5 rounded-full" style={{ backgroundColor: look.color }} />}
+								{active && <motion.span layoutId="course-tab" className="absolute inset-x-3 bottom-0 h-0.5 rounded-full sm:bottom-1" style={{ backgroundColor: look.color }} />}
 							</button>
 						);
 					})}

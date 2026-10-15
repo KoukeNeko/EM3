@@ -46,6 +46,9 @@ export function AppShell() {
 		{ keys: "escape", run: e => (e.target as HTMLElement).blur(), inInput: true }
 	]);
 
+	// Three-pane pages use the full width and scroll each pane on their own.
+	const wide = location.pathname.startsWith("/mail");
+
 	return (
 		<MotionConfig reducedMotion={motionPref === "reduced" ? "always" : "user"} transition={{ type: "spring", stiffness: 380, damping: 34, mass: 0.8 }}>
 			<a href="#main" onClick={e => (e.preventDefault(), main.current?.focus())} className="btn btn-sm fixed top-2 left-2 z-[60] -translate-y-20 focus:translate-y-0">
@@ -62,7 +65,7 @@ export function AppShell() {
 						key={location.pathname}
 						initial={{ opacity: 0, y: 10 }}
 						animate={{ opacity: 1, y: 0 }}
-						className="mx-auto w-full max-w-6xl px-4 pt-4 pb-28 outline-none sm:px-6 lg:px-10 lg:pt-10 lg:pb-16"
+						className={`mx-auto w-full px-4 pt-4 pb-28 outline-none sm:px-6 lg:pt-10 ${wide ? "max-w-[112rem] lg:px-6 lg:pb-6 2xl:px-10" : "max-w-6xl lg:px-10 lg:pb-16"}`}
 					>
 						<Outlet />
 					</motion.main>

@@ -27,7 +27,7 @@ import {
 } from "@phosphor-icons/react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { type MailFolder, type MailSearch, type MailSummary, mailE3Url, PAGE_SIZE, useMailIndex, useMailMenu, useMailMessage, useSetUnread } from "./api";
 
 const FOLDERS: { key: Exclude<MailFolder, "course">; label: string; icon: typeof TrayIcon }[] = [
@@ -79,8 +79,8 @@ export function MailPage() {
 				</a>
 			</header>
 
-			<div className="grid grid-cols-1 gap-6 lg:grid-cols-[13rem_minmax(0,22rem)_1fr]">
-				<nav aria-label="信件資料夾" className={`space-y-4 ${openId ? "hidden lg:block" : ""}`}>
+			<div className="grid grid-cols-1 gap-6 lg:h-[calc(100dvh-11.5rem)] lg:min-h-[28rem] lg:grid-cols-[11rem_17rem_minmax(0,1fr)] lg:gap-4 xl:grid-cols-[13rem_24rem_minmax(0,1fr)] 2xl:grid-cols-[14rem_28rem_minmax(0,1fr)] 2xl:gap-6">
+				<nav aria-label="信件資料夾" className={`space-y-4 lg:-mx-1 lg:overflow-y-auto lg:px-1 ${openId ? "hidden lg:block" : ""}`}>
 					<ul className="flex gap-1 overflow-x-auto scrollbar-none lg:flex-col">
 						{FOLDERS.map(f => {
 							const active = folder === f.key;
@@ -102,8 +102,9 @@ export function MailPage() {
 					<CourseFolders menu={menu.data?.courses ?? []} current={search.course} onPick={id => navigate({ to: "/mail", search: { course: id } })} />
 				</nav>
 
-				<section className={`min-w-0 ${openId ? "hidden lg:block" : ""}`}>
+				<section className={`min-w-0 lg:flex lg:min-h-0 lg:flex-col ${openId ? "hidden lg:flex" : ""}`}>
 					<form
+						className="shrink-0"
 						onSubmit={e => {
 							e.preventDefault();
 							set({ q: draft.trim() || undefined, page: undefined, m: undefined });
@@ -121,8 +122,8 @@ export function MailPage() {
 					) : !messages.length ? (
 						<Empty icon={<EnvelopeSimpleIcon size={40} weight="duotone" />} title={search.q ? `找不到「${search.q}」` : "這裡沒有信"} />
 					) : (
-						<>
-							<ul className="card-quiet divide-y divide-base-content/[0.06] overflow-hidden">
+						<div className="card-quiet flex min-h-0 flex-col overflow-hidden">
+							<ul className="divide-y divide-base-content/[0.06] overflow-y-auto overscroll-contain">
 								{messages.map(m => (
 									<li key={m.id}>
 										<MailRow m={m} active={m.id === openId} folder={folder} onOpen={() => set({ m: m.id })} />
@@ -130,7 +131,7 @@ export function MailPage() {
 								))}
 							</ul>
 							{!search.q && total > PAGE_SIZE && (
-								<div className="mt-3 flex items-center justify-between text-sm text-base-content/55">
+								<div className="flex shrink-0 items-center justify-between border-t hairline px-4 py-1.5 text-sm text-base-content/55">
 									<span>
 										{page * PAGE_SIZE + 1}–{Math.min(total, (page + 1) * PAGE_SIZE)} / {total}
 									</span>
@@ -144,18 +145,18 @@ export function MailPage() {
 									</div>
 								</div>
 							)}
-						</>
+						</div>
 					)}
 				</section>
 
-				<section className={`min-w-0 ${openId ? "" : "hidden lg:block"}`}>
+				<section className={`min-w-0 lg:min-h-0 ${openId ? "" : "hidden lg:block"}`}>
 					<AnimatePresence mode="wait">
 						{openId ? (
-							<motion.div key={openId} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}>
+							<motion.div key={openId} className="lg:h-full" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}>
 								<Reader id={openId} onBack={() => set({ m: undefined })} />
 							</motion.div>
 						) : (
-							<div className="card-quiet hidden h-64 place-items-center text-sm text-base-content/40 lg:grid">選一封信來看（J / K 上下切換）</div>
+							<div className="card-quiet hidden h-full place-items-center text-sm text-base-content/40 lg:grid">選一封信來看（J / K 上下切換）</div>
 						)}
 					</AnimatePresence>
 				</section>
@@ -201,8 +202,12 @@ function MailRow({ m, active, folder, onOpen }: { m: MailSummary; active: boolea
 	const looks = usePrefs(s => s.courses);
 	const look = course ? resolveLook(course, looks[course.id]) : undefined;
 	const who = folder === "sent" || folder === "drafts" ? m.recipients.map(r => cleanAuthor(r.fullname)).join("、") || "（沒有收件人）" : cleanAuthor(m.sender.fullname);
+	const ref = useRef<HTMLButtonElement>(null);
+	useEffect(() => {
+		if (active) ref.current?.scrollIntoView({ block: "nearest" });
+	}, [active]);
 	return (
-		<button data-nav onClick={onOpen} className={`flex w-full gap-3 px-4 py-3 text-left transition-colors ${active ? "bg-primary/[0.06]" : "hover:bg-base-content/[0.03]"}`}>
+		<button ref={ref} data-nav onClick={onOpen} className={`flex w-full gap-3 px-4 py-3 text-left transition-colors ${active ? "bg-primary/[0.06]" : "hover:bg-base-content/[0.03]"}`}>
 			<span className={`mt-2 size-2 shrink-0 rounded-full ${m.unread ? "bg-primary" : ""}`} aria-label={m.unread ? "未讀" : undefined} />
 			<span className="min-w-0 grow">
 				<span className="flex items-center gap-2">
@@ -244,7 +249,7 @@ function Reader({ id, onBack }: { id: number; onBack: () => void }) {
 	const cc = m.recipients.filter(r => r.type === "cc");
 
 	return (
-		<article className="card-quiet p-5 sm:p-6">
+		<article className="card-quiet p-5 sm:p-6 lg:max-h-full lg:overflow-y-auto lg:overscroll-contain">
 			<div className="mb-4 flex flex-wrap items-center gap-2">
 				<button onClick={onBack} className="btn btn-ghost btn-sm -ml-2 lg:hidden">
 					<ArrowLeftIcon size={16} />
