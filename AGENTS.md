@@ -50,6 +50,7 @@ The account belongs to a real student, so all automated work must be read-only:
 Helpers:
 
 - `python3 scripts/e3-ws.py <wsfunction> [key=value ...]` calls a web service function and prints JSON. It only allows read verbs (`get`, `search`, `list`, `check`, `can`, `data`). Array params use Moodle syntax, e.g. `'courseids[0]=25283'`.
+- `scripts/e3-browser.mjs` exports `openE3()`: a Playwright session on the official E3 web UI that aborts every non-GET request (except read-only AJAX) and GETs that Moodle stores as preferences (`quickgrading`, `perpage`, `filter`, table sorting). Use it for research on real E3 pages; the account is an `editingteacher` in course 23571 with real students.
 - `NODE_PATH=$(npm root -g) node scripts/shot.mjs <outdir> <width>x<height> <hash-path>...` screenshots EM3 pages signed in as the test account, with state-changing E3 requests aborted. Run `pnpm dev` first. Uses the globally installed Playwright.
 
 Research notes about how E3 is used live in `docs/research/`; design rationale is in `docs/design.md`.
