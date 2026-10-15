@@ -1,0 +1,8 @@
+name: 其他
+description: 問題、想法或任何事
+body:
+  - type: textarea
+    attributes:
+      label: 內容
+    validations:
+      required: true

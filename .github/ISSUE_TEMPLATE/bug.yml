@@ -1,0 +1,14 @@
+name: 回報問題
+description: 有東西壞掉或跟預期不一樣
+labels: [bug]
+body:
+  - type: textarea
+    attributes:
+      label: 發生什麼事
+      description: 做了什麼、看到什麼、原本以為會怎樣。有截圖更好，記得遮掉姓名和學號。
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: 裝置與瀏覽器
+      placeholder: 例如 iPhone Safari、Mac Chrome、已安裝的 App

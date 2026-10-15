@@ -1,0 +1,10 @@
+name: 功能建議
+description: 想要 EM3 多做什麼
+labels: [enhancement]
+body:
+  - type: textarea
+    attributes:
+      label: 想要什麼
+      description: 你想做什麼事、現在在 E3 上卡在哪裡。
+    validations:
+      required: true
