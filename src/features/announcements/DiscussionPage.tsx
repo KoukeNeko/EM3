@@ -2,7 +2,7 @@ import { FileIcon } from "@/features/course/FileIcon";
 import { openFile } from "@/features/course/FilePreview";
 import { useCourseIndex } from "@/features/courses/api";
 import { usePrefs } from "@/features/preferences/store";
-import { cleanHtml, e3Link, fileExt, humanSize } from "@/lib/moodle/files";
+import { cleanHtml, e3Link, fileExt, humanSize, linkify } from "@/lib/moodle/files";
 import { fullDateTime } from "@/lib/time/relative";
 import { CourseTag } from "@/shared/ui/CourseTag";
 import { ErrorNote, Lines } from "@/shared/ui/States";
@@ -11,11 +11,6 @@ import { ArrowLeftIcon, ArrowSquareOutIcon } from "@phosphor-icons/react";
 import { Link, useParams, useRouter } from "@tanstack/react-router";
 import { useEffect, useMemo } from "react";
 import { cleanAuthor, type ForumPost, useDiscussion } from "./api";
-
-/** Turns bare URLs in post HTML into links (teachers often paste them as text). */
-function linkify(html: string) {
-	return html.replace(/(^|[\s>（(「])(https?:\/\/[^\s<>"）)」]+)/g, '$1<a href="$2">$2</a>');
-}
 
 export function DiscussionPage() {
 	const { courseId, discussionId } = useParams({ from: "/app/courses/$courseId/discussion/$discussionId" });

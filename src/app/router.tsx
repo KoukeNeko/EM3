@@ -1,5 +1,6 @@
 import { useSession } from "@/features/auth/session";
 import { createHashHistory, createRootRoute, createRoute, createRouter, lazyRouteComponent, Outlet, redirect } from "@tanstack/react-router";
+import type { MailSearch } from "@/features/mail/api";
 import { AppShell } from "./AppShell";
 
 // Hash history keeps every route reloadable on any static host (GitHub Pages,
@@ -47,13 +48,13 @@ const coursesRoute = createRoute({
 	component: lazyRouteComponent(() => import("@/features/courses/CoursesPage"), "CoursesPage")
 });
 
-export type CourseTab = "materials" | "assignments" | "announcements" | "grades";
+export type CourseTab = "materials" | "assignments" | "announcements" | "grades" | "teach";
 
 const courseRoute = createRoute({
 	getParentRoute: () => appRoute,
 	path: "/courses/$courseId",
 	validateSearch: (s: Record<string, unknown>): { tab?: CourseTab; q?: string } => ({
-		tab: (["materials", "assignments", "announcements", "grades"] as const).includes(s.tab as CourseTab) ? (s.tab as CourseTab) : undefined,
+		tab: (["materials", "assignments", "announcements", "grades", "teach"] as const).includes(s.tab as CourseTab) ? (s.tab as CourseTab) : undefined,
 		q: typeof s.q === "string" ? s.q : undefined
 	}),
 	component: lazyRouteComponent(() => import("@/features/course/CoursePage"), "CoursePage")
@@ -63,6 +64,31 @@ const assignmentRoute = createRoute({
 	getParentRoute: () => appRoute,
 	path: "/courses/$courseId/assign/$cmid",
 	component: lazyRouteComponent(() => import("@/features/assignments/AssignmentPage"), "AssignmentPage")
+});
+
+const gradingRoute = createRoute({
+	getParentRoute: () => appRoute,
+	path: "/courses/$courseId/assign/$cmid/grade",
+	validateSearch: (s: Record<string, unknown>): { student?: number } => ({ student: Number(s.student) || undefined }),
+	component: lazyRouteComponent(() => import("@/features/teaching/GradingPage"), "GradingPage")
+});
+
+const announceRoute = createRoute({
+	getParentRoute: () => appRoute,
+	path: "/courses/$courseId/announce",
+	component: lazyRouteComponent(() => import("@/features/teaching/AnnouncePage"), "AnnouncePage")
+});
+
+const quizBuilderRoute = createRoute({
+	getParentRoute: () => appRoute,
+	path: "/courses/$courseId/quiz-builder",
+	component: lazyRouteComponent(() => import("@/features/teaching/QuizBuilderPage"), "QuizBuilderPage")
+});
+
+const writeRoute = createRoute({
+	getParentRoute: () => appRoute,
+	path: "/courses/$courseId/write",
+	component: lazyRouteComponent(() => import("@/features/teaching/WritePage"), "WritePage")
 });
 
 const discussionRoute = createRoute({
@@ -82,6 +108,19 @@ const announcementsRoute = createRoute({
 	path: "/announcements",
 	validateSearch: (s: Record<string, unknown>): { course?: number } => ({ course: Number(s.course) || undefined }),
 	component: lazyRouteComponent(() => import("@/features/announcements/AnnouncementsPage"), "AnnouncementsPage")
+});
+
+const mailRoute = createRoute({
+	getParentRoute: () => appRoute,
+	path: "/mail",
+	validateSearch: (s: Record<string, unknown>): MailSearch => ({
+		folder: ["inbox", "starred", "sent", "drafts", "trash"].includes(s.folder as string) ? (s.folder as MailSearch["folder"]) : undefined,
+		course: Number(s.course) || undefined,
+		m: Number(s.m) || undefined,
+		q: typeof s.q === "string" && s.q ? s.q : undefined,
+		page: Number(s.page) || undefined
+	}),
+	component: lazyRouteComponent(() => import("@/features/mail/MailPage"), "MailPage")
 });
 
 const calendarRoute = createRoute({
@@ -105,7 +144,23 @@ const settingsRoute = createRoute({
 const routeTree = rootRoute.addChildren([
 	loginRoute,
 	welcomeRoute,
-	appRoute.addChildren([dashboardRoute, coursesRoute, courseRoute, assignmentRoute, discussionRoute, tasksRoute, announcementsRoute, calendarRoute, timetableRoute, settingsRoute])
+	appRoute.addChildren([
+		dashboardRoute,
+		coursesRoute,
+		courseRoute,
+		assignmentRoute,
+		gradingRoute,
+		announceRoute,
+		quizBuilderRoute,
+		writeRoute,
+		discussionRoute,
+		tasksRoute,
+		announcementsRoute,
+		mailRoute,
+		calendarRoute,
+		timetableRoute,
+		settingsRoute
+	])
 ]);
 
 export const router = createRouter({

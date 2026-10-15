@@ -172,6 +172,9 @@ export interface Assignment {
 	activity?: string;
 	submissionstatement?: string;
 	timelimit?: number;
+	markingworkflow?: number;
+	markingallocation?: number;
+	blindmarking?: number;
 }
 
 export interface AssignmentsResponse {

@@ -74,3 +74,8 @@ export function fileExt(name: string) {
 	const i = name.lastIndexOf(".");
 	return i > 0 ? name.slice(i + 1).toLowerCase() : "";
 }
+
+/** Turns bare URLs in HTML text into links (people often paste them as plain text). */
+export function linkify(html: string) {
+	return html.replace(/(^|[\s>（(「])(https?:\/\/[^\s<>"）)」]+)/g, '$1<a href="$2">$2</a>');
+}

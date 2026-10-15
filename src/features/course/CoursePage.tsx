@@ -8,11 +8,13 @@ import { DAY_LABELS, periodByCode, slotBlocks } from "@/features/timetable/perio
 import { syllabusUrl } from "@/features/timetable/import";
 import { e3Link } from "@/lib/moodle/files";
 import { ErrorNote, Lines } from "@/shared/ui/States";
-import { ArrowSquareOutIcon, ChartBarIcon, FilesIcon, ListChecksIcon, MegaphoneIcon, PaintBrushIcon, ScrollIcon } from "@phosphor-icons/react";
+import { ArrowSquareOutIcon, ChalkboardTeacherIcon, ChartBarIcon, FilesIcon, ListChecksIcon, MegaphoneIcon, PaintBrushIcon, ScrollIcon } from "@phosphor-icons/react";
 import { Link, useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useState } from "react";
 import { useHotkeys } from "@/shared/keyboard/hotkeys";
+import { useIsTeaching } from "@/features/teaching/api";
+import { TeachTab } from "@/features/teaching/TeachTab";
 import { CourseAnnouncements } from "./CourseAnnouncements";
 import { CourseTasks } from "./CourseTasks";
 import { GradesTab } from "./GradesTab";
@@ -24,10 +26,11 @@ const TABS: { key: CourseTab; label: string; icon: typeof FilesIcon }[] = [
 	{ key: "announcements", label: "公告", icon: MegaphoneIcon },
 	{ key: "grades", label: "成績", icon: ChartBarIcon }
 ];
+const TEACH_TAB = { key: "teach" as CourseTab, label: "教學", icon: ChalkboardTeacherIcon };
 
 export function CoursePage() {
 	const { courseId } = useParams({ from: "/app/courses/$courseId" });
-	const { tab = "materials" } = useSearch({ from: "/app/courses/$courseId" });
+	const search = useSearch({ from: "/app/courses/$courseId" });
 	const navigate = useNavigate();
 	const { byId, isPending, error } = useCourseIndex();
 	const course = byId.get(Number(courseId));
@@ -36,9 +39,13 @@ export function CoursePage() {
 	const timetable = usePrefs(s => s.timetable);
 	const now = useNow();
 	const [editing, setEditing] = useState(false);
+	const teaching = useIsTeaching(Number(courseId));
+	// Teachers land on 教學 by default; everyone else on 教材.
+	const tab = search.tab ?? (teaching ? "teach" : "materials");
+	const tabs = teaching ? [TEACH_TAB, ...TABS] : TABS;
 	const switchTab = (dir: number) => {
-		const i = TABS.findIndex(t => t.key === tab);
-		void navigate({ to: ".", search: { tab: TABS[(i + dir + TABS.length) % TABS.length].key }, replace: true });
+		const i = tabs.findIndex(t => t.key === tab);
+		void navigate({ to: ".", search: { tab: tabs[(i + dir + tabs.length) % tabs.length].key }, replace: true });
 	};
 	useHotkeys([
 		{ keys: "[", run: () => switchTab(-1) },
@@ -117,7 +124,7 @@ export function CoursePage() {
 						requestAnimationFrame(() => list.querySelector<HTMLElement>('[aria-selected="true"]')?.focus());
 					}}
 				>
-					{TABS.map(t => {
+					{tabs.map(t => {
 						const active = tab === t.key;
 						return (
 							<button
@@ -144,6 +151,7 @@ export function CoursePage() {
 				{tab === "assignments" && <CourseTasks course={course} />}
 				{tab === "announcements" && <CourseAnnouncements course={course} />}
 				{tab === "grades" && <GradesTab course={course} />}
+				{tab === "teach" && teaching && <TeachTab course={course} />}
 			</motion.div>
 
 			<AppearanceDialog course={course} open={editing} onClose={() => setEditing(false)} />

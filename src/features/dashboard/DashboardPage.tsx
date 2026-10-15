@@ -16,6 +16,7 @@ import { ArrowRightIcon, BellSimpleIcon, ChalkboardTeacherIcon, ConfettiIcon, Fi
 import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { RecentMaterials } from "./RecentMaterials";
+import { GradingQueue } from "@/features/teaching/GradingQueue";
 
 const stagger = { animate: { transition: { staggerChildren: 0.05 } } };
 const rise = { initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 } };
@@ -47,6 +48,9 @@ export function DashboardPage() {
 					</motion.div>
 				</div>
 				<div className="space-y-6 lg:col-span-4 lg:space-y-8">
+					<motion.div variants={rise}>
+						<GradingQueue />
+					</motion.div>
 					<motion.div variants={rise}>
 						<DueSoon tasks={tasks} loading={isPending || coursesPending} />
 					</motion.div>

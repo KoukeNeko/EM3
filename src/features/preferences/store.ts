@@ -28,6 +28,8 @@ export interface Prefs {
 	motion: MotionPref;
 	calendarSpan: CalendarSpan;
 	showWeekend: boolean;
+	/** Reusable feedback phrases for grading (Markdown). */
+	snippets: string[];
 	/** Course ids → appearance. */
 	courses: Record<string, CourseLook>;
 	/** Course ids → weekly slots. */
@@ -53,7 +55,8 @@ export const DEFAULT_PREFS: Prefs = {
 	showWeekend: false,
 	courses: {},
 	timetable: {},
-	seen: {}
+	seen: {},
+	snippets: ["做得很好！", "請補上執行結果的截圖。", "格式請依照作業說明。", "遲交，依規定扣分。"]
 };
 
 export const PREFS_STORAGE_KEY = "em3:prefs";

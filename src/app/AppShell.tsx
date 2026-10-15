@@ -6,10 +6,8 @@ import { CommandPalette, useCommandPalette } from "@/shared/ui/CommandPalette";
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { focusSearch, MOD_LABEL, moveListFocus, useHotkeys } from "@/shared/keyboard/hotkeys";
 import { ShortcutsDialog } from "@/shared/keyboard/ShortcutsDialog";
-import { ArrowSquareOutIcon, CalendarDotsIcon, EnvelopeSimpleIcon, KeyboardIcon, MagnifyingGlassIcon, TableIcon } from "@phosphor-icons/react";
-import { useQuery } from "@tanstack/react-query";
-import { call } from "@/lib/moodle/client";
-import { e3Link } from "@/lib/moodle/files";
+import { CalendarDotsIcon, EnvelopeSimpleIcon, KeyboardIcon, MagnifyingGlassIcon, TableIcon } from "@phosphor-icons/react";
+import { useMailUnread } from "@/features/mail/api";
 import { motion, MotionConfig } from "motion/react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { NAV } from "./nav";
@@ -78,7 +76,7 @@ export function AppShell() {
 	);
 }
 
-function NavLink({ to, children, layoutGroup, hint }: { to: string; children: ReactNode; layoutGroup: string; hint?: string }) {
+function NavLink({ to, children, layoutGroup, hint, badge }: { to: string; children: ReactNode; layoutGroup: string; hint?: string; badge?: number }) {
 	const { pathname } = useLocation();
 	const active = to === "/" ? pathname === "/" : pathname.startsWith(to);
 	return (
@@ -89,12 +87,14 @@ function NavLink({ to, children, layoutGroup, hint }: { to: string; children: Re
 		>
 			{active && <motion.span layoutId={layoutGroup} className="absolute inset-0 -z-0 rounded-xl bg-base-content/[0.07]" />}
 			<span className="relative z-10 flex items-center gap-3">{children}</span>
-			{hint && <kbd className="kbd kbd-xs relative z-10 ml-auto border-0 bg-transparent text-base-content/30">{hint}</kbd>}
+			{!!badge && <span className="badge badge-sm badge-primary relative z-10 ml-auto">{badge}</span>}
+			{hint && <kbd className={`kbd kbd-xs relative z-10 border-0 bg-transparent text-base-content/30 ${badge ? "" : "ml-auto"}`}>{hint}</kbd>}
 		</Link>
 	);
 }
 
 function Sidebar({ onSearch, onHelp }: { onSearch: () => void; onHelp: () => void }) {
+	const { data: mailUnread } = useMailUnread();
 	const { currentCourses, current } = useCourseIndex();
 	const prefs = usePrefs(s => s.courses);
 	const timetable = usePrefs(s => s.timetable);
@@ -123,14 +123,12 @@ function Sidebar({ onSearch, onHelp }: { onSearch: () => void; onHelp: () => voi
 
 			<nav className="flex flex-col gap-0.5" aria-label="主要頁面">
 				{NAV.map((n, i) => (
-					<NavLink key={n.to} to={n.to} layoutGroup="side-nav" hint={String(i + 1)}>
+					<NavLink key={n.to} to={n.to} layoutGroup="side-nav" hint={String(i + 1)} badge={n.to === "/mail" ? mailUnread : undefined}>
 						<n.icon size={19} weight={pathname === n.to || (n.to !== "/" && pathname.startsWith(n.to)) ? "fill" : "regular"} />
 						{n.label}
 					</NavLink>
 				))}
 			</nav>
-
-			<MailLink />
 
 			<div className="flex min-h-0 flex-1 flex-col">
 				<p className="mb-2 px-3 text-xs font-medium tracking-wide text-base-content/45">{current ? `${current.label}` : "本學期"}</p>
@@ -181,21 +179,13 @@ function Sidebar({ onSearch, onHelp }: { onSearch: () => void; onHelp: () => voi
 	);
 }
 
-/** E3's own mailbox (local_dcpcmail). EM3 only shows the unread count; reading mail marks it read, so it opens on E3. */
-function MailLink() {
-	const { data } = useQuery({ queryKey: ["mail-unread"], queryFn: () => call<number>("local_dcpcmail_get_unread_count"), staleTime: 5 * 60_000 });
+function MobileMailButton() {
+	const { data } = useMailUnread();
 	return (
-		<a
-			href={e3Link("/local/dcpcmail/view.php?t=inbox&c=1")}
-			target="_blank"
-			rel="noreferrer"
-			className="-mt-4 flex items-center gap-3 rounded-xl px-3 py-2 text-[0.94rem] text-base-content/65 hover:text-base-content"
-		>
+		<Link to="/mail" className="btn btn-ghost btn-sm btn-circle indicator" aria-label={data ? `信件，${data} 封未讀` : "信件"}>
+			{!!data && <span className="indicator-item badge badge-xs badge-primary">{data}</span>}
 			<EnvelopeSimpleIcon size={19} />
-			E3 信件
-			{!!data && <span className="badge badge-sm badge-primary ml-auto">{data}</span>}
-			<ArrowSquareOutIcon size={14} className={data ? "" : "ml-auto"} />
-		</a>
+		</Link>
 	);
 }
 
@@ -207,6 +197,7 @@ function MobileTopBar({ onSearch }: { onSearch: () => void }) {
 				<span className="font-semibold tracking-tight">EM3</span>
 			</Link>
 			<div className="grow" />
+			<MobileMailButton />
 			<Link to="/calendar" className="btn btn-ghost btn-sm btn-circle" aria-label="行事曆">
 				<CalendarDotsIcon size={19} />
 			</Link>
