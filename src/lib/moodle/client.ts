@@ -1,0 +1,144 @@
+// Thin client for the Moodle mobile web service API that E3 exposes.
+// Every endpoint used here answers with `Access-Control-Allow-Origin: *`, so a
+// static SPA can talk to E3 directly without a proxy.
+
+export const E3_ORIGIN = "https://e3p.nycu.edu.tw";
+
+export class MoodleError extends Error {
+	constructor(
+		message: string,
+		readonly code: string
+	) {
+		super(message);
+		this.name = "MoodleError";
+	}
+
+	/** True when the token is gone or revoked and the user must sign in again. */
+	get isAuthError() {
+		return this.code === "invalidtoken";
+	}
+}
+
+type Scalar = string | number | boolean;
+type WsValue = Scalar | WsValue[] | { [key: string]: WsValue | undefined };
+export type WsParams = { [key: string]: WsValue | undefined };
+
+/** Flattens nested params into Moodle's PHP-style `a[0][b]=c` form encoding. */
+export function encodeParams(params: WsParams, body = new URLSearchParams(), prefix = ""): URLSearchParams {
+	for (const [key, value] of Object.entries(params)) {
+		if (value === undefined) continue;
+		const name = prefix ? `${prefix}[${key}]` : key;
+		if (Array.isArray(value) || (typeof value === "object" && value !== null)) {
+			encodeParams(value as WsParams, body, name);
+		} else {
+			body.append(name, typeof value === "boolean" ? (value ? "1" : "0") : String(value));
+		}
+	}
+	return body;
+}
+
+let currentToken: string | null = null;
+let onAuthLost: (() => void) | null = null;
+
+export function setToken(token: string | null) {
+	currentToken = token;
+}
+
+export function getToken() {
+	return currentToken;
+}
+
+export function setAuthLostHandler(handler: () => void) {
+	onAuthLost = handler;
+}
+
+function isErrorPayload(data: unknown): data is { exception?: string; errorcode: string; message?: string; error?: string } {
+	return typeof data === "object" && data !== null && "errorcode" in data && ("exception" in data || "error" in data);
+}
+
+export async function call<T>(wsfunction: string, params: WsParams = {}, signal?: AbortSignal): Promise<T> {
+	if (!currentToken) throw new MoodleError("尚未登入", "notloggedin");
+	const body = encodeParams({ ...params, wstoken: currentToken, wsfunction, moodlewsrestformat: "json" });
+	const res = await fetch(`${E3_ORIGIN}/webservice/rest/server.php?wsfunction=${wsfunction}`, { method: "POST", body, signal });
+	if (!res.ok) throw new MoodleError(`E3 回應 HTTP ${res.status}`, "http");
+	const data: unknown = await res.json();
+	if (isErrorPayload(data)) {
+		const err = new MoodleError(data.message ?? data.error ?? data.errorcode, data.errorcode);
+		if (err.isAuthError) onAuthLost?.();
+		throw err;
+	}
+	return data as T;
+}
+
+export interface TokenResponse {
+	token: string;
+	privatetoken?: string;
+}
+
+export async function requestToken(username: string, password: string): Promise<TokenResponse> {
+	const body = new URLSearchParams({ username, password, service: "moodle_mobile_app" });
+	const res = await fetch(`${E3_ORIGIN}/login/token.php`, { method: "POST", body });
+	if (!res.ok) throw new MoodleError(`E3 回應 HTTP ${res.status}`, "http");
+	const data = (await res.json()) as TokenResponse | { error: string; errorcode: string };
+	if ("error" in data) throw new MoodleError(data.error, data.errorcode);
+	return data;
+}
+
+export interface UploadedFile {
+	component: string;
+	contextid: number;
+	userid: string;
+	filearea: string;
+	filename: string;
+	filepath: string;
+	itemid: number;
+	license: string;
+	author: string;
+	source: string;
+}
+
+/**
+ * Uploads files into a fresh draft area and returns its item id. Passing an
+ * existing `itemid` appends to that draft area instead.
+ */
+export async function uploadToDraft(files: File[], itemid = 0, onProgress?: (fraction: number) => void): Promise<number> {
+	if (!currentToken) throw new MoodleError("尚未登入", "notloggedin");
+	const form = new FormData();
+	form.append("token", currentToken);
+	form.append("filearea", "draft");
+	form.append("itemid", String(itemid));
+	files.forEach((file, i) => form.append(`file_${i}`, file, file.name));
+
+	// XHR instead of fetch so we can report upload progress.
+	const text = await new Promise<string>((resolve, reject) => {
+		const xhr = new XMLHttpRequest();
+		xhr.open("POST", `${E3_ORIGIN}/webservice/upload.php`);
+		xhr.upload.onprogress = e => e.lengthComputable && onProgress?.(e.loaded / e.total);
+		xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve(xhr.responseText) : reject(new MoodleError(`上傳失敗 HTTP ${xhr.status}`, "http")));
+		xhr.onerror = () => reject(new MoodleError("上傳時網路中斷", "network"));
+		xhr.send(form);
+	});
+	const data = JSON.parse(text) as UploadedFile[] | { error: string; errorcode: string };
+	if (!Array.isArray(data)) throw new MoodleError(data.error, data.errorcode);
+	return data[0].itemid;
+}
+
+interface BatchResult {
+	responses: { error: boolean; data?: string; exception?: string }[];
+}
+
+/**
+ * Runs several read-only WS calls in one HTTP round trip through
+ * tool_mobile_call_external_functions. Failed calls resolve to `null`.
+ */
+export async function callMany<T>(requests: { fn: string; args: WsParams }[], signal?: AbortSignal): Promise<(T | null)[]> {
+	if (!requests.length) return [];
+	const res = await call<BatchResult>(
+		"tool_mobile_call_external_functions",
+		{
+			requests: requests.map(r => ({ function: r.fn, arguments: JSON.stringify(r.args), settingfilter: 1, settingfileurl: 1 }))
+		},
+		signal
+	);
+	return res.responses.map(r => (r.error || !r.data ? null : (JSON.parse(r.data) as T)));
+}
