@@ -15,13 +15,26 @@ import {
 	MagnifyingGlassIcon,
 	PlayCircleIcon,
 	SortAscendingIcon,
-	SortDescendingIcon
+	SortDescendingIcon,
+	WarningIcon
 } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FileIcon } from "./FileIcon";
 import { openFile } from "./FilePreview";
-import { buildMaterialsZip, type Material, type MaterialFile, materialsFrom, type PickedFile, useFolderIntros } from "./materials";
+import {
+	buildMaterialsZip,
+	canStreamToDisk,
+	LARGE_ZIP,
+	type Material,
+	type MaterialFile,
+	materialsFrom,
+	type PickedFile,
+	streamMaterialsZip,
+	useFolderIntros,
+	ZIP_LIMIT,
+	type ZipProgress
+} from "./materials";
 
 const WEEK = 7 * 86400;
 
@@ -242,59 +255,102 @@ function SelectionBar({
 	onDone: () => void;
 }) {
 	const look = useCourseLook(course)!;
-	const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
-	const [failed, setFailed] = useState<string[]>([]);
+	const [progress, setProgress] = useState<ZipProgress | null>(null);
+	const [result, setResult] = useState<{ failed: string[]; error?: string } | null>(null);
+	const abort = useRef<AbortController | null>(null);
 	const items: PickedFile[] = materials.flatMap(m => m.files.filter(f => picked.has(f.key)).map(file => ({ file, folder: m.files.length > 1 ? m.title : undefined })));
 	const size = items.reduce((n, it) => n + it.file.size, 0);
 	const allVisible = visibleKeys.length > 0 && visibleKeys.every(k => picked.has(k));
+	const zipping = items.length > 1;
+	const tooBig = zipping && size > ZIP_LIMIT;
+	const stream = zipping && size > LARGE_ZIP && canStreamToDisk();
+	const risky = zipping && !tooBig && size > LARGE_ZIP && !stream;
 
 	useEffect(() => {
 		const onKey = (e: KeyboardEvent) => e.key === "Escape" && !progress && !document.querySelector("dialog[open]") && onDone();
 		window.addEventListener("keydown", onKey);
 		return () => window.removeEventListener("keydown", onKey);
 	}, [progress, onDone]);
+	useEffect(() => () => abort.current?.abort(), []);
 
 	async function download() {
-		setFailed([]);
-		if (items.length === 1) {
+		setResult(null);
+		if (!zipping) {
 			const a = document.createElement("a");
 			a.href = fileUrl(items[0].file.url, { download: true });
 			a.click();
 			return;
 		}
-		setProgress({ done: 0, total: items.length });
+		const name = `${safeName(look.title) || "教材"}.zip`;
+		const ctrl = new AbortController();
+		abort.current = ctrl;
 		try {
-			const res = await buildMaterialsZip(items, (done, total) => setProgress({ done, total }));
-			if (res.failed.length < items.length) saveBlob(res.blob, `${safeName(look.title) || "教材"}.zip`);
-			setFailed(res.failed);
+			if (stream) {
+				// The save dialog comes first: it needs this click's user gesture.
+				const res = await streamMaterialsZip(items, name, ctrl.signal, p => setProgress(p));
+				if (res) setResult({ failed: res.failed });
+			} else {
+				setProgress({ files: 0, bytes: 0 });
+				const res = await buildMaterialsZip(items, ctrl.signal, p => setProgress(p));
+				if (res.failed.length < items.length) saveBlob(res.blob, name);
+				setResult({ failed: res.failed });
+			}
+		} catch (e) {
+			if (!ctrl.signal.aborted) setResult({ failed: [], error: e instanceof Error ? e.message : String(e) });
 		} finally {
+			abort.current = null;
 			setProgress(null);
 		}
 	}
 
+	const note = tooBig ? (
+		<span className="block text-xs text-error">超過 4 GB，zip 裝不下。請分成幾批選取，或改成一個一個下載。</span>
+	) : risky ? (
+		<span className="flex items-start gap-1 text-xs text-base-content/70">
+			<WarningIcon size={14} weight="fill" className="mt-px shrink-0 text-warning" />
+			檔案很大，你的瀏覽器不支援邊下載邊寫入硬碟，打包時要全部放在記憶體裡，可能會失敗。建議改用電腦版 Chrome 或 Edge，或分批下載。
+		</span>
+	) : stream ? (
+		<span className="block text-xs text-base-content/50">檔案較大，會先請你選存檔位置，再邊下載邊寫入。</span>
+	) : null;
+
 	return (
 		<div className="sticky bottom-24 z-10 lg:bottom-4" role="region" aria-label="批量下載">
 			<div className="flex flex-wrap items-center gap-2 rounded-2xl border hairline bg-base-100/95 p-2 pl-4 shadow-lg backdrop-blur">
-				<span className="grow text-sm" aria-live="polite">
+				<span className="min-w-0 grow text-sm" aria-live="polite">
 					{progress ? (
 						<>
-							正在打包 {progress.done} / {progress.total}
+							正在打包{" "}
+							<span className="tabular-nums">
+								{progress.files} / {items.length}
+							</span>
+							<span className="text-base-content/50">
+								{" "}
+								· {humanSize(progress.bytes)} / {humanSize(size)}
+							</span>
 						</>
 					) : items.length ? (
 						<>
 							已選 <strong className="tabular-nums">{items.length}</strong> 個檔案 <span className="text-base-content/50">· {humanSize(size)}</span>
+							{note}
 						</>
 					) : (
 						<span className="text-base-content/60">勾選要下載的檔案</span>
 					)}
-					{failed.length > 0 && !progress && (
+					{result?.error && !progress && <span className="block text-xs text-error">打包失敗：{result.error}</span>}
+					{!!result?.failed.length && !progress && (
 						<span className="block text-xs text-error">
-							有 {failed.length} 個檔案下載失敗：{failed.join("、")}
+							有 {result.failed.length} 個檔案下載失敗：{result.failed.join("、")}
 						</span>
 					)}
 				</span>
 				{progress ? (
-					<progress className="progress progress-primary w-28" value={progress.done} max={progress.total} />
+					<>
+						<progress className="progress progress-primary w-28" value={size ? progress.bytes : progress.files} max={size || items.length} />
+						<button className="btn btn-ghost btn-sm" onClick={() => abort.current?.abort()}>
+							取消
+						</button>
+					</>
 				) : (
 					<>
 						<button className="btn btn-ghost btn-sm" onClick={() => toggle(visibleKeys, !allVisible)} disabled={!visibleKeys.length}>
@@ -303,9 +359,9 @@ function SelectionBar({
 						<button className="btn btn-ghost btn-sm" onClick={onDone}>
 							完成
 						</button>
-						<button className="btn btn-primary btn-sm" onClick={download} disabled={!items.length}>
+						<button className={`btn btn-sm ${risky ? "btn-warning" : "btn-primary"}`} onClick={download} disabled={!items.length || tooBig}>
 							<DownloadSimpleIcon size={16} />
-							{items.length > 1 ? "下載 zip" : "下載"}
+							{risky ? "仍要下載" : zipping ? "下載 zip" : "下載"}
 						</button>
 					</>
 				)}
