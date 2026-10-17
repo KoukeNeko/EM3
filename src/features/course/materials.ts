@@ -1,8 +1,10 @@
 import { courseContentsQuery } from "@/features/courses/api";
 import { call, callMany } from "@/lib/moodle/client";
-import { e3Link, fileExt } from "@/lib/moodle/files";
+import { safeName } from "@/lib/download";
+import { e3Link, fileExt, fileUrl } from "@/lib/moodle/files";
 import type { CourseModule, CourseSection } from "@/lib/moodle/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { zipSync, type Zippable } from "fflate";
 
 // E3 calls folders 「教材」 and nearly every folder holds one to three files, so
 // EM3 flattens them: the unit of material is the file, grouped by its folder.
@@ -136,3 +138,39 @@ export function fileKind(ext: string): "pdf" | "slides" | "doc" | "sheet" | "vid
 
 /** Files a browser can show inline. */
 export const canPreview = (ext: string) => ["pdf", "png", "jpg", "jpeg", "gif", "webp", "svg", "mp4", "webm", "mov", "m4v", "mp3", "m4a", "wav", "txt"].includes(ext);
+
+export interface PickedFile {
+	file: MaterialFile;
+	/** Folder to place the file in, for folders that hold more than one file. */
+	folder?: string;
+}
+
+/** Zips the picked files, keeping multi-file folders as folders. A few downloads run at a time to go easy on E3. */
+export async function buildMaterialsZip(items: PickedFile[], onProgress?: (done: number, total: number) => void) {
+	const tree: Zippable = {};
+	const used = new Set<string>();
+	const failed: string[] = [];
+	const place = (path: string, data: Uint8Array) => {
+		let p = path;
+		for (let n = 2; used.has(p); n++) p = path.replace(/(\.[^./]+)?$/, ` (${n})$1`);
+		used.add(p);
+		tree[p] = [data, { level: 0 }];
+	};
+	const queue = [...items];
+	let done = 0;
+	const worker = async () => {
+		for (let it = queue.shift(); it; it = queue.shift()) {
+			try {
+				const res = await fetch(fileUrl(it.file.url, { download: true }));
+				if (!res.ok) throw new Error(String(res.status));
+				const sub = it.file.path.split("/").filter(Boolean).map(safeName);
+				place([it.folder && safeName(it.folder), ...sub, safeName(it.file.name)].filter(Boolean).join("/"), new Uint8Array(await res.arrayBuffer()));
+			} catch {
+				failed.push(it.file.name);
+			}
+			onProgress?.(++done, items.length);
+		}
+	};
+	await Promise.all(Array.from({ length: Math.min(4, items.length) }, worker));
+	return { blob: new Blob([zipSync(tree) as BlobPart], { type: "application/zip" }), failed };
+}
