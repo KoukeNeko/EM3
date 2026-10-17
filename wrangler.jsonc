@@ -7,5 +7,6 @@
 		"not_found_handling": "single-page-application"
 	},
 	"routes": [{ "pattern": "e3.emtech.cc", "custom_domain": true }],
-	"workers_dev": false
+	"workers_dev": false,
+	"previews": {}
 }
