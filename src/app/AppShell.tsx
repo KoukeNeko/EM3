@@ -14,6 +14,7 @@ import { NAV } from "./nav";
 import { Logo } from "@/shared/ui/Logo";
 import { Avatar } from "@/shared/ui/Avatar";
 import { FilePreviewHost } from "@/features/course/FilePreview";
+import { LeaveToE3Host } from "@/shared/ui/LeaveToE3";
 
 const DOCK = ["/", "/tasks", "/courses", "/announcements", "/settings"] as const;
 
@@ -75,6 +76,7 @@ export function AppShell() {
 			<CommandPalette {...palette} />
 			<ShortcutsDialog open={helpOpen} onClose={() => setHelpOpen(false)} />
 			<FilePreviewHost />
+			<LeaveToE3Host />
 		</MotionConfig>
 	);
 }

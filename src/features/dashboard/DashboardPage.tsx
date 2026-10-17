@@ -1,7 +1,7 @@
 import { type Announcement, cleanAuthor, postTime, useAnnouncements } from "@/features/announcements/api";
 import { TASK_STATE_LABEL } from "@/features/assignments/api";
 import { isOpenTask, type Task, useActiveCourses, useTasks } from "@/features/assignments/tasks";
-import { CalendarBoard, TaskLine, taskLink } from "@/features/calendar/Board";
+import { CalendarBoard, TaskAnchor, TaskLine } from "@/features/calendar/Board";
 import { useSiteInfo } from "@/features/courses/api";
 import { CourseGlyph, resolveLook, useCourseLook } from "@/features/courses/look";
 import type { ParsedCourse } from "@/features/courses/parse";
@@ -105,9 +105,9 @@ function Greeting({ tasks, loading }: { tasks: Task[]; loading: boolean }) {
 					<>
 						{" "}
 						最近的是{" "}
-						<Link {...(taskLink(next) ?? { to: "/tasks" })} className="font-medium text-base-content underline decoration-base-content/20 underline-offset-4 hover:decoration-base-content">
+						<TaskAnchor t={next} className="font-medium text-base-content underline decoration-base-content/20 underline-offset-4 hover:decoration-base-content">
 							{resolveLook(next.course).title}・{next.name}
-						</Link>
+						</TaskAnchor>
 						（{deadlinePhrase(next.due)}）。
 					</>
 				)}
@@ -207,16 +207,15 @@ function NowCard({ courses, tasks }: { courses: ParsedCourse[]; tasks: Task[] })
 				<ul className="relative mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
 					{exercises.map(t => {
 						const cd = countdown(t.due);
-						const link = taskLink(t);
 						return (
 							<li key={t.key}>
-								<Link {...(link ?? { to: "/tasks" })} className="flex items-center gap-3 rounded-xl bg-base-100/80 px-3 py-2.5 backdrop-blur transition hover:bg-base-100">
+								<TaskAnchor t={t} className="flex items-center gap-3 rounded-xl bg-base-100/80 px-3 py-2.5 backdrop-blur transition hover:bg-base-100">
 									<span className="min-w-0 grow">
 										<span className="block truncate text-sm font-medium">{t.name}</span>
 										<span className={`text-xs ${cd.urgency === "critical" || cd.urgency === "overdue" ? "text-error" : "text-base-content/55"}`}>{cd.text}</span>
 									</span>
-									<span className="btn btn-sm btn-neutral">繳交</span>
-								</Link>
+									<span className="btn btn-sm btn-neutral">{t.kind === "quiz" ? "作答" : "繳交"}</span>
+								</TaskAnchor>
 							</li>
 						);
 					})}

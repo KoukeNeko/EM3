@@ -8,6 +8,7 @@ import { CaretLeftIcon, CaretRightIcon, CheckCircleIcon, ExamIcon } from "@phosp
 import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useMedia } from "@/shared/hooks/useMedia";
+import { E3Away } from "@/shared/ui/LeaveToE3";
 import { type ReactNode, useMemo, useRef, useState } from "react";
 import { gridArrow, useHotkeys } from "@/shared/keyboard/hotkeys";
 
@@ -202,8 +203,30 @@ export function CalendarBoard({ tasks, compact = false, spanKey = "calendarSpan"
 	);
 }
 
-export function taskLink(t: Task) {
+function taskLink(t: Task) {
 	return t.kind === "assign" ? ({ to: "/courses/$courseId/assign/$cmid", params: { courseId: String(t.course.id), cmid: String(t.cmid) } } as const) : null;
+}
+
+/** Opens a task in EM3, or explains why it has to be done on E3 first. */
+export function TaskAnchor({ t, className, children }: { t: Task; className?: string; children: ReactNode }) {
+	const link = taskLink(t);
+	if (link)
+		return (
+			<Link {...link} className={className} data-nav>
+				{children}
+			</Link>
+		);
+	if (t.external)
+		return (
+			<E3Away notice={{ ...t.external, title: t.name }} className={className}>
+				{children}
+			</E3Away>
+		);
+	return (
+		<Link to="/tasks" className={className} data-nav>
+			{children}
+		</Link>
+	);
 }
 
 function TaskChip({ t, dense }: { t: Task; dense: boolean }) {
@@ -239,7 +262,6 @@ function TaskChip({ t, dense }: { t: Task; dense: boolean }) {
 
 export function TaskLine({ t, trailing }: { t: Task; trailing?: ReactNode }) {
 	const look = resolveLook(t.course, usePrefs.getState().courses[t.course.id]);
-	const link = taskLink(t);
 	const done = t.state === "submitted" || t.state === "graded";
 	const inner = (
 		<>
@@ -254,14 +276,9 @@ export function TaskLine({ t, trailing }: { t: Task; trailing?: ReactNode }) {
 			{trailing}
 		</>
 	);
-	const cls = "flex items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-base-content/[0.04]";
-	return link ? (
-		<Link {...link} className={cls} data-nav>
+	return (
+		<TaskAnchor t={t} className="flex items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-base-content/[0.04]">
 			{inner}
-		</Link>
-	) : (
-		<a href={t.externalUrl} target="_blank" rel="noreferrer" className={cls} data-nav>
-			{inner}
-		</a>
+		</TaskAnchor>
 	);
 }

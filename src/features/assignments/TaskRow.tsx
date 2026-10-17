@@ -1,12 +1,11 @@
 import { TASK_STATE_LABEL, submissionFiles } from "@/features/assignments/api";
 import type { Task } from "@/features/assignments/tasks";
-import { taskLink } from "@/features/calendar/Board";
+import { TaskAnchor } from "@/features/calendar/Board";
 import { useCourseLook } from "@/features/courses/look";
 import { countdown } from "@/lib/time/relative";
 import { CourseTag } from "@/shared/ui/CourseTag";
 import { Due } from "@/shared/ui/Time";
 import { CaretRightIcon, CheckCircleIcon, ExamIcon, LightningIcon, PaperclipIcon } from "@phosphor-icons/react";
-import { Link } from "@tanstack/react-router";
 
 const STATE_TONE: Record<Task["state"], string> = {
 	upcoming: "badge-ghost",
@@ -19,7 +18,6 @@ const STATE_TONE: Record<Task["state"], string> = {
 
 export function TaskRow({ t, showCourse = true }: { t: Task; showCourse?: boolean }) {
 	const look = useCourseLook(t.course)!;
-	const link = taskLink(t);
 	const open = t.state === "todo" || t.state === "late";
 	const cd = t.due ? countdown(t.due) : null;
 	const files = submissionFiles(t.status).length;
@@ -52,20 +50,15 @@ export function TaskRow({ t, showCourse = true }: { t: Task; showCourse?: boolea
 				</span>
 			</span>
 			<span className="flex shrink-0 flex-col items-end gap-1">
-				<span className={`badge badge-sm badge-soft ${STATE_TONE[t.state]}`}>{TASK_STATE_LABEL[t.state]}</span>
+				<span className={`badge badge-sm badge-soft ${STATE_TONE[t.state]}`}>{t.kind === "quiz" && t.state === "submitted" ? "已作答" : TASK_STATE_LABEL[t.state]}</span>
 				{open && cd && <span className={`text-xs tabular-nums ${cd.urgency === "critical" || cd.urgency === "overdue" ? "text-error" : "text-base-content/50"}`}>{cd.text}</span>}
 			</span>
 			<CaretRightIcon size={16} className="shrink-0 text-base-content/30" />
 		</>
 	);
-	const cls = "flex items-center gap-3 px-4 py-3 transition-colors hover:bg-base-content/[0.03]";
-	return link ? (
-		<Link {...link} className={cls} data-nav>
+	return (
+		<TaskAnchor t={t} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-base-content/[0.03]">
 			{body}
-		</Link>
-	) : (
-		<a href={t.externalUrl} target="_blank" rel="noreferrer" className={cls} data-nav>
-			{body}
-		</a>
+		</TaskAnchor>
 	);
 }
