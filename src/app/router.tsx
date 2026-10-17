@@ -66,6 +66,12 @@ const assignmentRoute = createRoute({
 	component: lazyRouteComponent(() => import("@/features/assignments/AssignmentPage"), "AssignmentPage")
 });
 
+const quizRoute = createRoute({
+	getParentRoute: () => appRoute,
+	path: "/courses/$courseId/quiz/$cmid",
+	component: lazyRouteComponent(() => import("@/features/quizzes/QuizPage"), "QuizPage")
+});
+
 const gradingRoute = createRoute({
 	getParentRoute: () => appRoute,
 	path: "/courses/$courseId/assign/$cmid/grade",
@@ -149,6 +155,7 @@ const routeTree = rootRoute.addChildren([
 		coursesRoute,
 		courseRoute,
 		assignmentRoute,
+		quizRoute,
 		gradingRoute,
 		announceRoute,
 		quizBuilderRoute,

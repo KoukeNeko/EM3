@@ -64,8 +64,12 @@ export function GradesTab({ course }: { course: ParsedCourse }) {
 						<li key={i.id} className="px-4 py-3">
 							<div className="flex items-center gap-3">
 								<div className="min-w-0 grow">
-									{i.itemmodule === "assign" && i.cmid ? (
-										<Link to="/courses/$courseId/assign/$cmid" params={{ courseId: String(course.id), cmid: String(i.cmid) }} className="truncate font-medium hover:underline">
+									{(i.itemmodule === "assign" || i.itemmodule === "quiz") && i.cmid ? (
+										<Link
+											to={i.itemmodule === "quiz" ? "/courses/$courseId/quiz/$cmid" : "/courses/$courseId/assign/$cmid"}
+											params={{ courseId: String(course.id), cmid: String(i.cmid) }}
+											className="truncate font-medium hover:underline"
+										>
 											{i.itemname}
 										</Link>
 									) : (

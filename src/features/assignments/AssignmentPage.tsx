@@ -165,7 +165,7 @@ export function AssignmentPage() {
 	);
 }
 
-function Fact({ icon, label, value, hint }: { icon: React.ReactNode; label: string; value: string; hint?: string }) {
+export function Fact({ icon, label, value, hint }: { icon: React.ReactNode; label: string; value: string; hint?: string }) {
 	return (
 		<div className="card-quiet px-4 py-3" title={hint}>
 			<dt className="flex items-center gap-1.5 text-xs text-base-content/50">

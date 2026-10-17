@@ -8,7 +8,6 @@ import { CaretLeftIcon, CaretRightIcon, CheckCircleIcon, ExamIcon } from "@phosp
 import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useMedia } from "@/shared/hooks/useMedia";
-import { E3Away } from "@/shared/ui/LeaveToE3";
 import { type ReactNode, useMemo, useRef, useState } from "react";
 import { gridArrow, useHotkeys } from "@/shared/keyboard/hotkeys";
 
@@ -204,26 +203,14 @@ export function CalendarBoard({ tasks, compact = false, spanKey = "calendarSpan"
 }
 
 function taskLink(t: Task) {
-	return t.kind === "assign" ? ({ to: "/courses/$courseId/assign/$cmid", params: { courseId: String(t.course.id), cmid: String(t.cmid) } } as const) : null;
+	const params = { courseId: String(t.course.id), cmid: String(t.cmid) };
+	return t.kind === "assign" ? ({ to: "/courses/$courseId/assign/$cmid", params } as const) : ({ to: "/courses/$courseId/quiz/$cmid", params } as const);
 }
 
-/** Opens a task in EM3, or explains why it has to be done on E3 first. */
+/** Opens a task's page in EM3. */
 export function TaskAnchor({ t, className, children }: { t: Task; className?: string; children: ReactNode }) {
-	const link = taskLink(t);
-	if (link)
-		return (
-			<Link {...link} className={className} data-nav>
-				{children}
-			</Link>
-		);
-	if (t.external)
-		return (
-			<E3Away notice={{ ...t.external, title: t.name }} className={className}>
-				{children}
-			</E3Away>
-		);
 	return (
-		<Link to="/tasks" className={className} data-nav>
+		<Link {...taskLink(t)} className={className} data-nav>
 			{children}
 		</Link>
 	);
