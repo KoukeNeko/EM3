@@ -1,4 +1,5 @@
 import { useCourseIndex } from "@/features/courses/api";
+import { saveBlob } from "@/lib/download";
 import { cleanHtml, e3Link } from "@/lib/moodle/files";
 import { markdownToHtml } from "@/shared/editor/markdown";
 import { CourseTag } from "@/shared/ui/CourseTag";
@@ -6,7 +7,6 @@ import { ArrowDownIcon, ArrowLeftIcon, ArrowUpIcon, ClipboardTextIcon, DownloadS
 import { useParams, useRouter } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
-import { saveBlob } from "./bundle";
 import { fromSpreadsheet, newQuestion, problems, type QType, QTYPE_LABEL, type Question, toMoodleXml } from "./quizXml";
 
 const KEY = (id: string) => `em3:quiz-draft:${id}`;

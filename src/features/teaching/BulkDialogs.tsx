@@ -1,4 +1,5 @@
 import { useCourseIndex } from "@/features/courses/api";
+import { saveBlob } from "@/lib/download";
 import { call } from "@/lib/moodle/client";
 import type { Assignment, SubmissionStatus } from "@/lib/moodle/types";
 import { deadlinePhrase } from "@/lib/time/relative";
@@ -6,7 +7,7 @@ import { CheckCircleIcon, CloudArrowUpIcon, CopyIcon, WarningIcon } from "@phosp
 import { useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { displayName, feedbackComment, feedbackFiles, fetchAllStatuses, isAuditor, type Participant, submittedFiles, useGrantExtension, useSaveGrade, useStudentIds } from "./api";
-import { buildSubmissionZip, type CsvGrade, gradesCsv, gradesFromCsv, matchFeedbackFiles, readCsv, saveBlob } from "./bundle";
+import { buildSubmissionZip, type CsvGrade, gradesCsv, gradesFromCsv, matchFeedbackFiles, readCsv } from "./bundle";
 
 export type BulkKind = "download" | "csv" | "files" | "extend";
 

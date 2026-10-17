@@ -1,3 +1,4 @@
+import { safeName } from "@/lib/download";
 import { fileUrl } from "@/lib/moodle/files";
 import type { SubmissionStatus } from "@/lib/moodle/types";
 import { unzipSync, zipSync, type Zippable } from "fflate";
@@ -10,17 +11,9 @@ import { displayName, onlineText, type Participant, submittedFiles } from "./api
 // Student IDs are not exposed to teachers through the API, so the internal
 // Moodle user id is the key; email is accepted as a fallback in the CSV.
 
-const safe = (s: string) => s.replace(/[\\/:*?"<>|]+/g, "_").trim() || "student";
+const safe = (s: string) => safeName(s) || "student";
 /** 「110550000_王小明_12345」: 學號 first so folders sort by student ID; the trailing Moodle id is the matching key. */
 export const folderName = (p: Pick<Participant, "id" | "fullname">, sid?: string) => [sid, safe(displayName(p.fullname)), p.id].filter(Boolean).join("_");
-
-export function saveBlob(blob: Blob, name: string) {
-	const a = document.createElement("a");
-	a.href = URL.createObjectURL(blob);
-	a.download = name;
-	a.click();
-	setTimeout(() => URL.revokeObjectURL(a.href), 10_000);
-}
 
 const csvCell = (v: string | number | null | undefined) => {
 	const s = v === null || v === undefined ? "" : String(v);
