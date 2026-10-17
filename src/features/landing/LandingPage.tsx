@@ -116,7 +116,7 @@ export function LandingPage() {
 		</Link>
 	) : (
 		<Link to="/login" className="btn btn-neutral btn-lg gap-2">
-			用 E3 帳號登入
+			用 Moodle 帳號登入
 			<ArrowRightIcon size={18} weight="bold" />
 		</Link>
 	);
@@ -381,7 +381,7 @@ export function LandingPage() {
 						<motion.h2 {...reveal} className="text-3xl leading-tight font-bold tracking-tight lg:col-span-4 sm:text-4xl">
 							你的帳號，
 							<br />
-							只跟 E3 說話
+							只跟 Moodle 說話
 						</motion.h2>
 						<motion.ul {...reveal} className="space-y-6 text-[1.05rem] leading-relaxed text-base-content/70 lg:col-span-8">
 							<li>

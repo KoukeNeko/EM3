@@ -6,7 +6,7 @@ import type { SiteInfo } from "@/lib/moodle/types";
 import { create } from "zustand";
 
 const COOKIE = "em3_session";
-/** Moodle mobile tokens live for months; refresh the cookie on every visit. */
+/** Moodle mobile tokens can live for months when the user opts to stay signed in. */
 const COOKIE_DAYS = 90;
 
 interface StoredSession {
@@ -39,7 +39,6 @@ const initial = loadSession();
 const initialBaseUrl = initial?.baseUrl ?? DEFAULT_MOODLE_URL;
 setMoodleBaseUrl(initialBaseUrl);
 setToken(initial?.token ?? null);
-if (initial) writeCookie(COOKIE, JSON.stringify({ ...initial, baseUrl: initialBaseUrl }), COOKIE_DAYS);
 
 export const useSession = create<SessionState>((set, get) => ({
 	token: initial?.token ?? null,

@@ -93,7 +93,12 @@ export async function requestToken(baseUrl: string, username: string, password: 
 		throw new MoodleError("無法連線到這個 Moodle；學校可能未啟用行動版 API 或跨網域存取", "network");
 	}
 	if (!res.ok) throw new MoodleError(`Moodle 回應 HTTP ${res.status}`, "http");
-	const data = (await res.json()) as TokenResponse | { error: string; errorcode: string };
+	let data: TokenResponse | { error: string; errorcode: string };
+	try {
+		data = (await res.json()) as TokenResponse | { error: string; errorcode: string };
+	} catch {
+		throw new MoodleError("這個網址看起來不是 Moodle，或學校未啟用行動版 API", "notmoodle");
+	}
 	if ("error" in data) throw new MoodleError(data.error, data.errorcode);
 	return data;
 }

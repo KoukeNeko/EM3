@@ -30,6 +30,17 @@ test("requestToken explains unreachable or CORS-blocked Moodle sites", async t =
 	});
 });
 
+test("requestToken explains non-JSON responses from non-Moodle sites", async t => {
+	t.mock.method(globalThis, "fetch", async () => new Response("<!doctype html><title>Not Moodle</title>", { headers: { "content-type": "text/html" } }));
+
+	await assert.rejects(requestToken("https://example.edu.tw", "student", "secret"), (error: unknown) => {
+		assert.ok(error instanceof MoodleError);
+		assert.equal(error.code, "notmoodle");
+		assert.match(error.message, /不是 Moodle|行動版 API/);
+		return true;
+	});
+});
+
 test("call uses the Moodle URL configured for the active session", async t => {
 	let requested = "";
 	t.mock.method(globalThis, "fetch", async input => {
