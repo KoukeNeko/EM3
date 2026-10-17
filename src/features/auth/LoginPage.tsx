@@ -1,4 +1,5 @@
 import { MoodleError } from "@/lib/moodle/client";
+import { DEFAULT_MOODLE_URL, MOODLE_SITES } from "@/lib/moodle/site";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { ArrowRightIcon, EyeIcon, EyeSlashIcon, LockSimpleIcon, ShieldCheckIcon, UserIcon } from "@phosphor-icons/react";
 import { motion } from "motion/react";
@@ -12,6 +13,9 @@ export function LoginPage() {
 	const { next } = useSearch({ from: "/login" });
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
+	const [baseUrl, setBaseUrl] = useState(DEFAULT_MOODLE_URL);
+	const [showOtherSchools, setShowOtherSchools] = useState(false);
+	const [customSite, setCustomSite] = useState(false);
 	const [remember, setRemember] = useState(true);
 	const [reveal, setReveal] = useState(false);
 	const [busy, setBusy] = useState(false);
@@ -22,7 +26,7 @@ export function LoginPage() {
 		setBusy(true);
 		setError(null);
 		try {
-			await signIn(username, password, remember);
+			await signIn(baseUrl, username, password, remember);
 			const target = next?.replace(/^#/, "");
 			await navigate({ to: target && target !== "/login" ? target : "/" });
 		} catch (err) {
@@ -33,30 +37,79 @@ export function LoginPage() {
 	}
 
 	return (
-		<main className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-base-200 px-4">
+		<main className="relative flex min-h-dvh flex-col items-center justify-center overflow-x-hidden bg-base-200 px-4 py-6">
 			<Backdrop />
 			<motion.div
 				initial={{ opacity: 0, y: 24, scale: 0.98 }}
 				animate={{ opacity: 1, y: 0, scale: 1 }}
 				transition={{ type: "spring", stiffness: 260, damping: 28 }}
-				className="surface relative w-full max-w-sm rounded-[1.75rem] p-7 shadow-2xl sm:p-9"
+				className="surface relative w-full max-w-md rounded-[1.75rem] p-7 shadow-2xl sm:p-9"
 			>
 				<div className="mb-8 flex items-center gap-3">
 					<Logo size={52} />
 					<div>
 						<h1 className="text-xl font-semibold tracking-tight">EM3</h1>
-						<p className="text-sm text-base-content/60">更快、更人類的交大 E3</p>
+						<p className="text-sm text-base-content/60">更快、更人類的 Moodle</p>
 					</div>
 				</div>
+				{!showOtherSchools && <p className="mb-5 text-sm font-medium text-base-content/70">使用陽明交通大學 E3 登入</p>}
 
 				<form onSubmit={submit} className="space-y-4">
+					{showOtherSchools && (
+						<fieldset className="fieldset">
+							<label htmlFor="moodle-site" className="fieldset-legend">
+								學校
+							</label>
+							<select
+								id="moodle-site"
+								aria-label="選擇 Moodle 學校"
+								className="select select-lg w-full"
+								value={customSite ? "custom" : baseUrl}
+								onChange={e => {
+									const custom = e.target.value === "custom";
+									setCustomSite(custom);
+									setBaseUrl(custom ? "" : e.target.value);
+								}}
+							>
+								{MOODLE_SITES.map(site => (
+									<option key={site.baseUrl} value={site.baseUrl}>
+										{site.name}
+									</option>
+								))}
+								<option value="custom">其他學校／自訂 Moodle 網址</option>
+							</select>
+							{customSite && (
+								<>
+									<input
+										type="text"
+										inputMode="url"
+										className="input input-lg mt-2 w-full"
+										autoComplete="url"
+										required
+										placeholder="https://moodle.example.edu.tw"
+										value={baseUrl}
+										onChange={e => setBaseUrl(e.target.value)}
+									/>
+									<p className="label">可貼上 Moodle 首頁或登入頁網址。</p>
+								</>
+							)}
+						</fieldset>
+					)}
 					<label className="input input-lg w-full">
 						<UserIcon size={18} className="opacity-50" />
-						<input className="grow" autoComplete="username" inputMode="text" autoFocus required placeholder="學號" value={username} onChange={e => setUsername(e.target.value)} />
+						<input className="grow" autoComplete="username" inputMode="text" required placeholder="帳號或學號" value={username} onChange={e => setUsername(e.target.value)} />
 					</label>
 					<label className="input input-lg w-full pr-2">
 						<LockSimpleIcon size={18} className="opacity-50" />
-						<input type={reveal ? "text" : "password"} className="grow" autoComplete="current-password" required placeholder="E3 密碼" value={password} onChange={e => setPassword(e.target.value)} />
+						<input
+							type={reveal ? "text" : "password"}
+							className="grow"
+							autoComplete="current-password"
+							required
+							placeholder="Moodle 密碼"
+							value={password}
+							onChange={e => setPassword(e.target.value)}
+						/>
 						<button type="button" className="btn btn-ghost btn-sm btn-circle" onClick={() => setReveal(r => !r)} aria-label={reveal ? "隱藏密碼" : "顯示密碼"}>
 							{reveal ? <EyeSlashIcon size={16} /> : <EyeIcon size={16} />}
 						</button>
@@ -82,6 +135,19 @@ export function LoginPage() {
 								<ArrowRightIcon size={18} weight="bold" />
 							</>
 						)}
+					</button>
+					<button
+						type="button"
+						className="btn btn-ghost btn-sm w-full font-normal text-base-content/60"
+						onClick={() => {
+							if (showOtherSchools) {
+								setBaseUrl(DEFAULT_MOODLE_URL);
+								setCustomSite(false);
+							}
+							setShowOtherSchools(value => !value);
+						}}
+					>
+						{showOtherSchools ? "改用陽明交通大學 E3" : "不是陽明交大的學生？選擇其他學校"}
 					</button>
 				</form>
 

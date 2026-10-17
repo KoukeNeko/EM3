@@ -116,7 +116,7 @@ export function LandingPage() {
 		</Link>
 	) : (
 		<Link to="/login" className="btn btn-neutral btn-lg gap-2">
-			用 E3 帳號登入
+			用 Moodle 帳號登入
 			<ArrowRightIcon size={18} weight="bold" />
 		</Link>
 	);
@@ -381,14 +381,14 @@ export function LandingPage() {
 						<motion.h2 {...reveal} className="text-3xl leading-tight font-bold tracking-tight lg:col-span-4 sm:text-4xl">
 							你的帳號，
 							<br />
-							只跟 E3 說話
+							只跟 Moodle 說話
 						</motion.h2>
 						<motion.ul {...reveal} className="space-y-6 text-[1.05rem] leading-relaxed text-base-content/70 lg:col-span-8">
 							<li>
-								<strong className="text-base-content">沒有後端。</strong>EM3 是一個靜態網頁，瀏覽器直接呼叫 e3p.nycu.edu.tw 的 Moodle 行動版 API，中間沒有任何伺服器。
+								<strong className="text-base-content">沒有後端。</strong>EM3 是一個靜態網頁，瀏覽器直接呼叫所選學校的 Moodle 行動版 API，中間沒有任何伺服器。
 							</li>
 							<li>
-								<strong className="text-base-content">不存密碼。</strong>密碼只用來向 E3 換一組登入憑證，憑證放在這個網站的 cookie，登出就清掉。
+								<strong className="text-base-content">不存密碼。</strong>密碼只用來向 Moodle 換一組登入憑證，憑證和學校網址放在這個網站的 cookie，登出就清掉。
 							</li>
 							<li>
 								<strong className="text-base-content">不替你按已讀。</strong>公告的已讀狀態只記在你的瀏覽器（站內信例外，打開時會像在 E3 一樣標為已讀）；EM3

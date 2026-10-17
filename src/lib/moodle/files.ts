@@ -1,5 +1,6 @@
 import DOMPurify from "dompurify";
-import { E3_ORIGIN, getToken } from "./client";
+import { getMoodleBaseUrl, getToken } from "./client";
+import { moodleUrl } from "./site";
 
 // Files in WS responses point at /webservice/pluginfile.php and need the token
 // appended. Rich text embeds the browser-session form (/pluginfile.php), which
@@ -7,15 +8,20 @@ import { E3_ORIGIN, getToken } from "./client";
 
 export function fileUrl(url: string, opts: { download?: boolean } = {}): string {
 	if (!url) return url;
+	const baseUrl = getMoodleBaseUrl();
+	const base = new URL(baseUrl);
+	const rootPath = base.pathname.replace(/\/$/, "");
 	let u: URL;
 	try {
-		u = new URL(url, E3_ORIGIN);
+		u = new URL(url, `${baseUrl}/`);
 	} catch {
 		return url;
 	}
-	if (u.origin !== E3_ORIGIN) return url;
-	if (u.pathname.startsWith("/pluginfile.php/")) u.pathname = "/webservice" + u.pathname;
-	if (u.pathname.startsWith("/webservice/pluginfile.php/")) {
+	if (u.origin !== base.origin) return url;
+	const pluginPath = `${rootPath}/pluginfile.php/`;
+	const webservicePluginPath = `${rootPath}/webservice/pluginfile.php/`;
+	if (u.pathname.startsWith(pluginPath)) u.pathname = `${rootPath}/webservice${u.pathname.slice(rootPath.length)}`;
+	if (u.pathname.startsWith(webservicePluginPath)) {
 		const token = getToken();
 		if (token) u.searchParams.set("token", token);
 		if (opts.download) u.searchParams.set("forcedownload", "1");
@@ -24,8 +30,10 @@ export function fileUrl(url: string, opts: { download?: boolean } = {}): string 
 	return u.toString();
 }
 
-/** Link to the same page on the official E3 site, for things EM3 does not cover. */
-export const e3Link = (path: string) => new URL(path, E3_ORIGIN).toString();
+/** Link to the same page on the configured Moodle site. */
+export const moodleLink = (path: string) => moodleUrl(getMoodleBaseUrl(), path);
+/** @deprecated Use moodleLink. Kept while feature modules migrate their wording. */
+export const e3Link = moodleLink;
 
 let hooked = false;
 

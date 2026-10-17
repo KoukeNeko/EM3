@@ -105,7 +105,7 @@ export function CoursePage() {
 						)}
 						<a className="btn btn-sm btn-ghost" href={e3Link(`/course/view.php?id=${course.id}`)} target="_blank" rel="noreferrer">
 							<ArrowSquareOutIcon size={16} />
-							E3
+							Moodle
 						</a>
 					</div>
 				</div>

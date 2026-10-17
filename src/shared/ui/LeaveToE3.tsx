@@ -49,7 +49,7 @@ export function LeaveToE3Host() {
 					<>
 						<p className="flex items-center gap-1.5 text-xs font-medium text-base-content/50">
 							<ArrowSquareOutIcon size={14} />
-							要在 E3 上完成
+							要在 Moodle 上完成
 						</p>
 						<h3 id="leave-e3-title" className="mt-1 text-lg font-semibold">
 							{notice.title}
@@ -67,7 +67,7 @@ export function LeaveToE3Host() {
 								取消
 							</button>
 							<a className="btn btn-primary" href={notice.url} target="_blank" rel="noreferrer" onClick={close} autoFocus>
-								前往 E3
+								前往 Moodle
 								<ArrowSquareOutIcon size={16} />
 							</a>
 						</div>

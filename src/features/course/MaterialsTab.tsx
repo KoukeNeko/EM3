@@ -141,7 +141,7 @@ function MaterialRow({ m, intro, selection }: { m: Material; intro?: string; sel
 				<Icon size={22} weight="duotone" className="shrink-0 text-info" />
 				<span className="min-w-0 grow">
 					<span className="block truncate text-sm font-medium">{m.title}</span>
-					<span className="block truncate text-xs text-base-content/50">{m.kind === "url" ? m.href : m.kind === "video" ? "在 E3 播放影片" : "在 E3 開啟"}</span>
+					<span className="block truncate text-xs text-base-content/50">{m.kind === "url" ? m.href : m.kind === "video" ? "在 Moodle 播放影片" : "在 Moodle 開啟"}</span>
 				</span>
 				<ArrowSquareOutIcon size={16} className="shrink-0 opacity-40" />
 			</a>

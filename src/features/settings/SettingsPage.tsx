@@ -27,6 +27,7 @@ export function SettingsPage() {
 	const { data: me } = useSiteInfo();
 	const prefs = usePrefs();
 	const signOut = useSession(s => s.signOut);
+	const baseUrl = useSession(s => s.baseUrl);
 	const navigate = useNavigate();
 	const fileInput = useRef<HTMLInputElement>(null);
 	const [msg, setMsg] = useState<string | null>(null);
@@ -58,9 +59,9 @@ export function SettingsPage() {
 
 	return (
 		<div className="max-w-4xl">
-			<PageTitle title="設定" subtitle="這裡的設定都只存在這個瀏覽器（localStorage），不會改到 E3。" />
+			<PageTitle title="設定" subtitle="這裡的設定都只存在這個瀏覽器（localStorage），不會改到 Moodle。" />
 
-			<Section title="帳號" desc="EM3 用 E3 行動版 API 的憑證登入。">
+			<Section title="帳號" desc="EM3 使用 Moodle 行動版 API 的憑證登入。">
 				<div className="card-quiet flex flex-wrap items-center gap-4 p-4">
 					{me && <Avatar me={me} size={48} />}
 					<div className="min-w-0 grow">
@@ -68,6 +69,7 @@ export function SettingsPage() {
 						<p className="text-sm text-base-content/55">
 							{me?.lastname} · {me?.username}
 						</p>
+						<p className="truncate text-xs text-base-content/40">{baseUrl}</p>
 					</div>
 					<button className="btn btn-sm" onClick={logout}>
 						<SignOutIcon size={16} />
@@ -81,7 +83,7 @@ export function SettingsPage() {
 					<fieldset className="fieldset">
 						<legend className="fieldset-legend">稱呼</legend>
 						<input className="input w-full max-w-xs" placeholder={me?.firstname ?? ""} value={prefs.nickname} onChange={e => prefs.set("nickname", e.target.value)} />
-						<p className="label">空白就用 E3 上的名字。</p>
+						<p className="label">空白就用 Moodle 上的名字。</p>
 					</fieldset>
 					{(
 						[
@@ -158,7 +160,7 @@ export function SettingsPage() {
 							queryClient.clear();
 							await idbPersister.removeClient();
 							await queryClient.refetchQueries();
-							setMsg("已清除快取並重新讀取 E3");
+							setMsg("已清除快取並重新讀取 Moodle");
 						}}
 					>
 						<ArrowsClockwiseIcon size={16} />
@@ -192,11 +194,11 @@ export function SettingsPage() {
 				</details>
 			</Section>
 
-			<Section title="關於" desc="EM3 是非官方的 E3 客戶端。">
+			<Section title="關於" desc="EM3 是非官方的 Moodle 客戶端。">
 				<p className="text-sm leading-relaxed text-base-content/65">
-					EM3 是純前端的靜態網站，直接在你的瀏覽器裡呼叫 e3p.nycu.edu.tw 的 Moodle 行動版 API，沒有中間伺服器。密碼只用來換取登入憑證，不會被儲存；憑證放在這個網站的 cookie。E3 的資料會快取在瀏覽器的
+					EM3 是純前端的靜態網站，直接在你的瀏覽器裡呼叫所選學校的 Moodle 行動版 API，沒有中間伺服器。密碼只用來換取登入憑證，不會被儲存；憑證放在這個網站的 cookie。Moodle 的資料會快取在瀏覽器的
 					IndexedDB 裡加快下次開啟速度，登出時會一併清除。
-					{me && <span className="mt-2 block text-xs text-base-content/45">E3 Moodle {me.release}</span>}
+					{me && <span className="mt-2 block text-xs text-base-content/45">Moodle {me.release}</span>}
 				</p>
 			</Section>
 		</div>

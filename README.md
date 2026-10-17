@@ -131,7 +131,9 @@ E3 的「教材」其實是資料夾，而大部分資料夾裡只有一份投�
 
 ## 使用
 
-打開 [e3.emtech.cc](https://e3.emtech.cc)，用原本的 E3 學號和密碼登入，不用安裝任何東西。
+打開 [e3.emtech.cc](https://e3.emtech.cc)，選擇學校後用原本的 Moodle 帳號和密碼登入，不用安裝任何東西。登入頁已內建陽明交大、中正、臺師大、政大、成大、銘傳、暨南、高雄大學與臺南大學，也可以貼上其他學校的 Moodle 首頁或登入頁網址。
+
+其他學校必須啟用 Moodle 行動版 Web Service，並允許瀏覽器跨網域呼叫 API；若學校未開放，EM3 會在登入時說明。課程、作業、公告、教材等標準 Moodle 功能可跨校使用；交大課綱匯入與 E3 站內信等校方客製功能仍只適用陽明交大。
 
 想要像 App 一樣從主畫面打開，可以把它裝起來：iPhone 用 Safari 的「分享 → 加入主畫面」，Chrome 和 Edge 點網址列的安裝按鈕，或到 EM3 的「設定 → App」。裝好後會在自己的視窗打開，沒有網路時也看得到上次載入的內容。
 
@@ -139,8 +141,8 @@ E3 的「教材」其實是資料夾，而大部分資料夾裡只有一份投�
 
 ## 隱私
 
-- **沒有後端。** EM3 是靜態網頁，瀏覽器直接呼叫 `e3p.nycu.edu.tw` 的 Moodle 行動版 API，中間沒有任何伺服器。
-- **不存密碼。** 密碼只用來向 E3 換一組登入憑證，憑證放在這個網站的 cookie，登出就清掉。
+- **沒有後端。** EM3 是靜態網頁，瀏覽器直接呼叫你所選學校的 Moodle 行動版 API，中間沒有任何伺服器。
+- **不存密碼。** 密碼只用來向 Moodle 換一組登入憑證，憑證與 Moodle 網址放在這個網站的 cookie，登出就清掉。
 - **不替你按已讀。** 公告的已讀狀態只記在你的瀏覽器（站內信例外：打開時會像在 E3 一樣標為已讀）；EM3 在你按下「確定繳交」之前不會動你的作業，老師的評分也要按下儲存才會寫入。
 - 個人設定存在 `localStorage`，E3 資料的快取存在 IndexedDB，登出時一併清除。
 
@@ -160,7 +162,7 @@ pnpm run deploy   # 部署到 Cloudflare（需要 wrangler 登入）
 
 技術：React 19、Vite、TypeScript、Tailwind CSS 4、daisyUI 5、TanStack Query、TanStack Router（hash history）、Zustand、motion、Phosphor Icons。
 
-E3 的 `login/token.php`、`webservice/rest/server.php`、`webservice/upload.php`、`webservice/pluginfile.php` 都回應 `Access-Control-Allow-Origin: *`，所以 `dist/` 可以放在任何靜態主機上，不需要 proxy。
+支援的 Moodle 站台會讓 `login/token.php`、`webservice/rest/server.php`、`webservice/upload.php`、`webservice/pluginfile.php` 回應 `Access-Control-Allow-Origin: *`，所以 `dist/` 可以放在任何靜態主機上，不需要 proxy。
 
 ### 專案結構
 
@@ -169,7 +171,7 @@ E3 的 `login/token.php`、`webservice/rest/server.php`、`webservice/upload.php
 ```
 src/
   app/             路由、App 外殼、Query client、主題同步
-  lib/moodle/      E3 Web Service client、型別、檔案 URL 與 HTML 處理
+  lib/moodle/      Moodle Web Service client、站台清單、型別、檔案 URL 與 HTML 處理
   lib/time/        相對時間與截止時間的寫法
   shared/          共用 UI、Milkdown 編輯器、鍵盤快捷鍵、hooks
   features/
