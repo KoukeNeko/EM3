@@ -37,6 +37,6 @@ export function CourseTasks({ course }: { course: ParsedCourse }) {
 	const { tasks, isPending, error, refetch } = useTasks(scope);
 	if (error) return <ErrorNote error={error} retry={refetch} />;
 	if (isPending) return <Lines n={4} />;
-	if (!tasks.length) return <Empty icon={<ListChecksIcon size={40} weight="duotone" />} title="這門課在 E3 上沒有作業或測驗" />;
+	if (!tasks.length) return <Empty icon={<ListChecksIcon size={40} weight="duotone" />} title="這門課在 Moodle 上沒有作業或測驗" />;
 	return <TaskGroups tasks={tasks} showCourse={false} />;
 }

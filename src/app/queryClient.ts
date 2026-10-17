@@ -1,4 +1,4 @@
-import { MoodleError } from "@/lib/moodle/client";
+import { MoodleError } from "../lib/moodle/client";
 import { QueryClient } from "@tanstack/react-query";
 import type { PersistedClient, Persister } from "@tanstack/react-query-persist-client";
 import { del, get, set } from "idb-keyval";
@@ -25,3 +25,9 @@ export const idbPersister: Persister = {
 	restoreClient: () => get<PersistedClient>(IDB_KEY),
 	removeClient: () => del(IDB_KEY)
 };
+
+/** Remove data owned by the previous Moodle account before entering the app. */
+export async function clearPrivateCache(removePersisted: () => PromiseLike<void> | void = () => idbPersister.removeClient()) {
+	queryClient.clear();
+	await removePersisted();
+}

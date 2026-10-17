@@ -17,7 +17,7 @@ export function ErrorNote({ error, retry }: { error: unknown; retry?: () => void
 	return (
 		<div role="alert" className="alert alert-soft alert-error">
 			<WarningCircleIcon size={20} />
-			<span>無法從 E3 取得資料：{msg}</span>
+			<span>無法從 Moodle 取得資料：{msg}</span>
 			{retry && (
 				<button className="btn btn-sm" onClick={retry}>
 					重試

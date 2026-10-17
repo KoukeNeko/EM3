@@ -1,8 +1,17 @@
-// Thin client for the Moodle mobile web service API that E3 exposes.
-// Every endpoint used here answers with `Access-Control-Allow-Origin: *`, so a
-// static SPA can talk to E3 directly without a proxy.
+// Thin client for Moodle's mobile web service API. Compatible sites expose
+// CORS headers so this static SPA can talk to them directly without a proxy.
 
-export const E3_ORIGIN = "https://e3p.nycu.edu.tw";
+import { DEFAULT_MOODLE_URL, moodleUrl, normalizeMoodleUrl } from "./site";
+
+let currentBaseUrl = DEFAULT_MOODLE_URL;
+
+export function setMoodleBaseUrl(baseUrl: string) {
+	currentBaseUrl = normalizeMoodleUrl(baseUrl);
+}
+
+export function getMoodleBaseUrl() {
+	return currentBaseUrl;
+}
 
 export class MoodleError extends Error {
 	constructor(
@@ -59,8 +68,8 @@ function isErrorPayload(data: unknown): data is { exception?: string; errorcode:
 export async function call<T>(wsfunction: string, params: WsParams = {}, signal?: AbortSignal): Promise<T> {
 	if (!currentToken) throw new MoodleError("尚未登入", "notloggedin");
 	const body = encodeParams({ ...params, wstoken: currentToken, wsfunction, moodlewsrestformat: "json" });
-	const res = await fetch(`${E3_ORIGIN}/webservice/rest/server.php?wsfunction=${wsfunction}`, { method: "POST", body, signal });
-	if (!res.ok) throw new MoodleError(`E3 回應 HTTP ${res.status}`, "http");
+	const res = await fetch(`${moodleUrl(currentBaseUrl, "webservice/rest/server.php")}?wsfunction=${wsfunction}`, { method: "POST", body, signal });
+	if (!res.ok) throw new MoodleError(`Moodle 回應 HTTP ${res.status}`, "http");
 	const data: unknown = await res.json();
 	if (isErrorPayload(data)) {
 		const err = new MoodleError(data.message ?? data.error ?? data.errorcode, data.errorcode);
@@ -75,10 +84,15 @@ export interface TokenResponse {
 	privatetoken?: string;
 }
 
-export async function requestToken(username: string, password: string): Promise<TokenResponse> {
+export async function requestToken(baseUrl: string, username: string, password: string): Promise<TokenResponse> {
 	const body = new URLSearchParams({ username, password, service: "moodle_mobile_app" });
-	const res = await fetch(`${E3_ORIGIN}/login/token.php`, { method: "POST", body });
-	if (!res.ok) throw new MoodleError(`E3 回應 HTTP ${res.status}`, "http");
+	let res: Response;
+	try {
+		res = await fetch(moodleUrl(baseUrl, "login/token.php"), { method: "POST", body });
+	} catch {
+		throw new MoodleError("無法連線到這個 Moodle；學校可能未啟用行動版 API 或跨網域存取", "network");
+	}
+	if (!res.ok) throw new MoodleError(`Moodle 回應 HTTP ${res.status}`, "http");
 	const data = (await res.json()) as TokenResponse | { error: string; errorcode: string };
 	if ("error" in data) throw new MoodleError(data.error, data.errorcode);
 	return data;
@@ -112,7 +126,7 @@ export async function uploadToDraft(files: File[], itemid = 0, onProgress?: (fra
 	// XHR instead of fetch so we can report upload progress.
 	const text = await new Promise<string>((resolve, reject) => {
 		const xhr = new XMLHttpRequest();
-		xhr.open("POST", `${E3_ORIGIN}/webservice/upload.php`);
+		xhr.open("POST", moodleUrl(currentBaseUrl, "webservice/upload.php"));
 		xhr.upload.onprogress = e => e.lengthComputable && onProgress?.(e.loaded / e.total);
 		xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve(xhr.responseText) : reject(new MoodleError(`上傳失敗 HTTP ${xhr.status}`, "http")));
 		xhr.onerror = () => reject(new MoodleError("上傳時網路中斷", "network"));
