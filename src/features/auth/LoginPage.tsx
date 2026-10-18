@@ -5,7 +5,7 @@ import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { ArrowRightIcon, BellRingingIcon, CaretDownIcon, CheckIcon, CopyIcon, EyeIcon, EyeSlashIcon, LockSimpleIcon, ShieldCheckIcon, UserIcon } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import { type FormEvent, useState } from "react";
-import { useSession } from "./session";
+import { lastSite, useSession } from "./session";
 import { Logo } from "@/shared/ui/Logo";
 
 export function LoginPage() {
@@ -14,9 +14,9 @@ export function LoginPage() {
 	const { next } = useSearch({ from: "/login" });
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
-	const [baseUrl, setBaseUrl] = useState(DEFAULT_MOODLE_URL);
-	const [showOtherSchools, setShowOtherSchools] = useState(false);
-	const [customSite, setCustomSite] = useState(false);
+	const [baseUrl, setBaseUrl] = useState(() => lastSite() ?? DEFAULT_MOODLE_URL);
+	const [showOtherSchools, setShowOtherSchools] = useState(baseUrl !== DEFAULT_MOODLE_URL);
+	const [customSite, setCustomSite] = useState(!MOODLE_SITES.some(site => site.baseUrl === baseUrl));
 	const [remember, setRemember] = useState(true);
 	const [reveal, setReveal] = useState(false);
 	const [busy, setBusy] = useState(false);
