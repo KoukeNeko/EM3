@@ -211,7 +211,8 @@ export function TimetablePage() {
 													animate={{ opacity: 1, scale: 1 }}
 													exit={{ opacity: 0, scale: 0.96 }}
 													transition={{ duration: 0.2, delay: entered.current ? 0 : Math.min(i * 0.06 + di * 0.04, 0.4) }}
-													className={`pointer-events-none absolute inset-x-1 overflow-hidden rounded-lg px-2 py-1.5 leading-tight ${live ? "ring-2" : ""}`}
+													// Without a brush a block opens its course; with one, clicks fall through to the grid to paint or erase.
+													className={`absolute inset-x-1 overflow-hidden rounded-lg px-2 py-1.5 leading-tight transition-[filter] ${brush === null ? "hover:brightness-125" : "pointer-events-none"} ${live ? "ring-2" : ""}`}
 													style={{
 														top: first.top + 4,
 														height: h,
@@ -226,6 +227,14 @@ export function TimetablePage() {
 														{h < 90 && b.room ? ` · ${b.room}` : ""}
 													</span>
 													{h >= 90 && b.room && <span className="block truncate text-xs opacity-65">{b.room}</span>}
+													{brush === null && (
+														<Link
+															to="/courses/$courseId"
+															params={{ courseId: String(b.courseId) }}
+															className="absolute inset-0 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2"
+															aria-label={`打開${look.title}`}
+														/>
+													)}
 												</motion.div>
 											);
 										})}
