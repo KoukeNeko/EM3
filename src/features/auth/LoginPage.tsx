@@ -2,7 +2,7 @@ import { MoodleError } from "@/lib/moodle/client";
 import { DEFAULT_MOODLE_URL, MOODLE_SITES } from "@/lib/moodle/site";
 import { finishSso, registerSsoHandler, startSso } from "@/lib/moodle/sso";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { ArrowRightIcon, EyeIcon, EyeSlashIcon, LockSimpleIcon, ShieldCheckIcon, UserIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon, BellRingingIcon, CaretDownIcon, CheckIcon, CopyIcon, EyeIcon, EyeSlashIcon, LockSimpleIcon, ShieldCheckIcon, UserIcon } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import { type FormEvent, useState } from "react";
 import { useSession } from "./session";
@@ -26,6 +26,7 @@ export function LoginPage() {
 	const sso = site?.sso;
 	const passwordLogin = site?.password !== false;
 	const [ssoLink, setSsoLink] = useState("");
+	const [copied, setCopied] = useState(false);
 
 	async function submit(e: FormEvent) {
 		e.preventDefault();
@@ -161,35 +162,60 @@ export function LoginPage() {
 				</form>
 
 				{sso && (
-					<div className="mt-4 space-y-2">
+					<div className="mt-4 space-y-3">
+						{/* Chrome asks when the school is picked, so this sits above the button it precedes. */}
+						{"registerProtocolHandler" in navigator && (
+							<div className="flex gap-3 rounded-box border border-base-content/10 bg-base-content/5 p-3.5">
+								<BellRingingIcon size={18} weight="duotone" className="mt-0.5 shrink-0 text-primary" />
+								<div className="min-w-0 space-y-1.5">
+									<p className="text-sm leading-relaxed">瀏覽器詢問是否開啟 web+emthree 連結時，請選擇「允許」；登入完成後將自動返回 EM3。</p>
+									<p className="text-xs leading-relaxed text-base-content/60">
+										誤關詢問會被 Chrome 視為封鎖，請至
+										<button
+											type="button"
+											aria-label="複製 chrome://settings/handlers"
+											className="mx-1 inline-flex items-center gap-1 rounded-field bg-base-content/10 px-1.5 py-0.5 font-mono text-base-content/80 transition-colors hover:bg-base-content/15"
+											onClick={() =>
+												navigator.clipboard.writeText("chrome://settings/handlers").then(() => {
+													setCopied(true);
+													setTimeout(() => setCopied(false), 1500);
+												})
+											}
+										>
+											chrome://settings/handlers
+											{copied ? <CheckIcon size={12} className="text-success" /> : <CopyIcon size={12} />}
+										</button>
+										移除封鎖後重新整理本頁。
+									</p>
+								</div>
+							</div>
+						)}
 						<button type="button" className={`btn w-full ${passwordLogin ? "btn-outline" : "btn-neutral btn-lg"}`} disabled={busy} onClick={() => startSso(baseUrl, sso.provider, remember, next)}>
 							使用學校單一登入（SSO）
 						</button>
-						{"registerProtocolHandler" in navigator && (
-							<div className="space-y-1 text-xs leading-relaxed text-base-content/60">
-								<ol className="list-decimal space-y-0.5 ps-4">
-									<li>瀏覽器詢問是否開啟 web+emthree 連結時，選擇「允許」。</li>
-									<li>選擇「使用學校單一登入（SSO）」並完成登入。</li>
-									<li>登入完成後將自動返回 EM3。</li>
-								</ol>
-								<p>Chrome 會將關閉詢問視為封鎖；如需解除，請前往 chrome://settings/handlers 移除封鎖後重新整理本頁。</p>
-							</div>
-						)}
 						{/* Safari cannot register the web+emthree handler, so there the paste box is the main path. */}
-						<details open={!("registerProtocolHandler" in navigator)} className="text-xs text-base-content/60">
-							<summary className="cursor-pointer">單一登入完成後沒有回到 EM3？</summary>
-							<ol className="mt-2 list-decimal space-y-0.5 ps-4 leading-relaxed">
-								<li>
-									在 {sso.pageName ?? "Moodle"} 的完成頁面，長按或按右鍵複製「{sso.linkText ?? "若應用程式沒有自動開啟，請點選這裡"}」的連結。
-								</li>
-								<li>回到本分頁，將連結貼至下方欄位。</li>
-								<li>選擇「完成登入」。</li>
-							</ol>
-							<div className="join mt-2 w-full">
-								<input className="input input-sm join-item grow" placeholder="web+emthree://token=…" value={ssoLink} onChange={e => setSsoLink(e.target.value)} />
-								<button type="button" className="btn btn-sm join-item" disabled={!ssoLink.trim()} onClick={pasteSsoLink}>
-									完成登入
-								</button>
+						<details open={!("registerProtocolHandler" in navigator)} className="group rounded-box border border-base-content/10">
+							<summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3.5 py-2.5 text-xs text-base-content/70 [&::-webkit-details-marker]:hidden">
+								單一登入完成後沒有回到 EM3？
+								<CaretDownIcon size={14} className="shrink-0 transition-transform group-open:rotate-180" />
+							</summary>
+							<div className="space-y-3 border-t border-base-content/10 px-3.5 pt-3 pb-3.5">
+								<ol className="space-y-2 text-xs leading-relaxed text-base-content/70">
+									{[`在 ${sso.pageName ?? "Moodle"} 的完成頁面，長按或按右鍵複製「${sso.linkText ?? "若應用程式沒有自動開啟，請點選這裡"}」的連結。`, "貼到下方欄位，選擇「完成登入」。"].map(
+										(step, i) => (
+											<li key={i} className="flex gap-2.5">
+												<span className="grid size-5 shrink-0 place-items-center rounded-full bg-base-content/10 font-semibold tabular-nums">{i + 1}</span>
+												<span>{step}</span>
+											</li>
+										)
+									)}
+								</ol>
+								<div className="join w-full">
+									<input className="input input-sm join-item grow" placeholder="web+emthree://token=…" value={ssoLink} onChange={e => setSsoLink(e.target.value)} />
+									<button type="button" className="btn btn-sm join-item" disabled={!ssoLink.trim()} onClick={pasteSsoLink}>
+										完成登入
+									</button>
+								</div>
 							</div>
 						</details>
 					</div>
