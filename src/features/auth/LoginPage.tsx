@@ -157,14 +157,14 @@ export function LoginPage() {
 						<button type="button" className={`btn w-full ${passwordLogin ? "btn-outline" : "btn-neutral btn-lg"}`} disabled={busy} onClick={() => startSso(baseUrl, sso.provider, remember, next)}>
 							使用學校單一登入（SSO）
 						</button>
-						{/* Safari cannot register the web+em3 handler, so there the paste box is the main path. */}
+						{/* Safari cannot register the web+emtech handler, so there the paste box is the main path. */}
 						<details open={!("registerProtocolHandler" in navigator)} className="text-xs text-base-content/60">
 							<summary className="cursor-pointer">單一登入完成後沒有回到 EM3？</summary>
 							<p className="mt-2 leading-relaxed">
 								在 {sso.pageName ?? "Moodle"} 的完成頁面對「{sso.linkText ?? "若應用程式沒有自動開啟，請點選這裡"}」的連結按右鍵複製連結，貼在這裡。
 							</p>
 							<div className="join mt-2 w-full">
-								<input className="input input-sm join-item grow" placeholder="web+em3://token=…" value={ssoLink} onChange={e => setSsoLink(e.target.value)} />
+								<input className="input input-sm join-item grow" placeholder="web+emtech://token=…" value={ssoLink} onChange={e => setSsoLink(e.target.value)} />
 								<button type="button" className="btn btn-sm join-item" disabled={!ssoLink.trim()} onClick={pasteSsoLink}>
 									完成登入
 								</button>

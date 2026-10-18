@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useSession } from "./session";
 
-/** Landing page of the `web+em3:` protocol handler: turns the link from Moodle into a session. */
+/** Landing page of the `web+emtech:` protocol handler: turns the link from Moodle into a session. */
 export function SsoPage() {
 	const { u } = useSearch({ from: "/sso" });
 	const signInWithToken = useSession(s => s.signInWithToken);

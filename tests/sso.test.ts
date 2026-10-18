@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import test from "node:test";
-import { decodeSsoToken, finishSso, md5 } from "../src/lib/moodle/sso.ts";
+import { decodeSsoToken, finishSso, md5, SCHEME } from "../src/lib/moodle/sso.ts";
 
 test("md5 matches node:crypto, including multi-block and non-ASCII input", () => {
 	for (const text of ["", "a", "abc", "https://ecourse2.ccu.edu.tw" + "f".repeat(32), "x".repeat(55), "x".repeat(56), "x".repeat(64), "x".repeat(300), "中正大學"]) {
@@ -10,7 +10,7 @@ test("md5 matches node:crypto, including multi-block and non-ASCII input", () =>
 });
 
 const base = "https://ecourse2.ccu.edu.tw";
-const link = (siteid: string, ...rest: string[]) => `web+em3://token=${Buffer.from([siteid, ...rest].join(":::")).toString("base64")}`;
+const link = (siteid: string, ...rest: string[]) => `web+emtech://token=${Buffer.from([siteid, ...rest].join(":::")).toString("base64")}`;
 
 test("decodeSsoToken returns the token when the passport matches", () => {
 	const siteid = md5(base + "pp");
@@ -21,7 +21,7 @@ test("decodeSsoToken returns the token when the passport matches", () => {
 test("decodeSsoToken accepts a percent-encoded link and a bare base64 string", () => {
 	const siteid = md5(base + "pp");
 	assert.equal(decodeSsoToken(encodeURIComponent(link(siteid, "tok123")), base, "pp"), "tok123");
-	assert.equal(decodeSsoToken(link(siteid, "tok123").replace("web+em3://token=", ""), base, "pp"), "tok123");
+	assert.equal(decodeSsoToken(link(siteid, "tok123").replace("web+emtech://token=", ""), base, "pp"), "tok123");
 });
 
 test("decodeSsoToken rejects a link made for another passport or site", () => {
@@ -58,4 +58,9 @@ test("finishSso refuses an expired or missing launch", () => {
 	assert.throws(() => finishSso(link(md5(base + "pp"), "tok123")), /逾時/);
 	store.clear();
 	assert.throws(() => finishSso(link(md5(base + "pp"), "tok123")), /逾時/);
+});
+
+test("the protocol scheme is one browsers and Moodle's launch.php both accept", () => {
+	assert.match(SCHEME, /^web\+[a-z]+$/); // registerProtocolHandler: ASCII letters only after "web+"
+	assert.match(SCHEME, /^[a-zA-Z][a-zA-Z0-9-+.]*$/); // launch.php's urlscheme check
 });
