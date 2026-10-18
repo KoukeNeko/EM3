@@ -85,7 +85,7 @@ export function useMailIndex(folder: MailFolder, itemid: number, query: string, 
 	});
 }
 
-/** Reading a message marks it read on E3, exactly like opening it there. */
+/** Reading a message marks it read on the school's site, exactly like opening it there. */
 export function useMailMessage(id: number | undefined) {
 	const qc = useQueryClient();
 	return useQuery({
@@ -94,6 +94,9 @@ export function useMailMessage(id: number | undefined) {
 		staleTime: 5 * 60_000,
 		queryFn: async () => {
 			const m = await call<MailMessage>("get_message", { id: id! });
+			// CCU's older local_mail returns the message without marking it read.
+			if (m.unread) await call<null>("set_unread", { id: id!, unread: false });
+			m.unread = false;
 			void qc.invalidateQueries({ queryKey: ["mail", "unread"] });
 			void qc.invalidateQueries({ queryKey: ["mail", "menu"] });
 			qc.setQueriesData<{ messages: MailSummary[] }>({ queryKey: ["mail", "index"] }, old => (old ? { ...old, messages: old.messages.map(x => (x.id === id ? { ...x, unread: false } : x)) } : old));
