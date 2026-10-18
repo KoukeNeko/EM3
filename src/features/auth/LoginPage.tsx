@@ -1,6 +1,6 @@
 import { MoodleError } from "@/lib/moodle/client";
 import { DEFAULT_MOODLE_URL, MOODLE_SITES } from "@/lib/moodle/site";
-import { finishSso, startSso } from "@/lib/moodle/sso";
+import { startSso } from "@/lib/moodle/sso";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { ArrowRightIcon, EyeIcon, EyeSlashIcon, LockSimpleIcon, ShieldCheckIcon, UserIcon } from "@phosphor-icons/react";
 import { motion } from "motion/react";
@@ -10,7 +10,6 @@ import { Logo } from "@/shared/ui/Logo";
 
 export function LoginPage() {
 	const signIn = useSession(s => s.signIn);
-	const signInWithToken = useSession(s => s.signInWithToken);
 	const navigate = useNavigate();
 	const { next } = useSearch({ from: "/login" });
 	const [username, setUsername] = useState("");
@@ -28,11 +27,12 @@ export function LoginPage() {
 	const passwordLogin = site?.password !== false;
 	const [ssoLink, setSsoLink] = useState("");
 
-	async function finish(login: () => Promise<unknown>) {
+	async function submit(e: FormEvent) {
+		e.preventDefault();
 		setBusy(true);
 		setError(null);
 		try {
-			await login();
+			await signIn(baseUrl, username, password, remember);
 			const target = next?.replace(/^#/, "");
 			await navigate({ to: target && target !== "/login" ? target : "/" });
 		} catch (err) {
@@ -42,16 +42,7 @@ export function LoginPage() {
 		}
 	}
 
-	const submit = (e: FormEvent) => {
-		e.preventDefault();
-		return finish(() => signIn(baseUrl, username, password, remember));
-	};
-
-	const pasteSsoLink = () =>
-		finish(async () => {
-			const { baseUrl, token, remember } = finishSso(ssoLink);
-			await signInWithToken(baseUrl, token, remember);
-		});
+	const pasteSsoLink = () => navigate({ to: "/sso", search: { u: ssoLink } });
 
 	return (
 		<main className="relative flex min-h-dvh flex-col items-center justify-center overflow-x-hidden bg-base-200 px-4 py-6">
@@ -163,7 +154,7 @@ export function LoginPage() {
 
 				{sso && (
 					<div className="mt-4 space-y-2">
-						<button type="button" className={`btn w-full ${passwordLogin ? "btn-outline" : "btn-neutral btn-lg"}`} disabled={busy} onClick={() => startSso(baseUrl, sso.provider, remember)}>
+						<button type="button" className={`btn w-full ${passwordLogin ? "btn-outline" : "btn-neutral btn-lg"}`} disabled={busy} onClick={() => startSso(baseUrl, sso.provider, remember, next)}>
 							使用學校單一登入（SSO）
 						</button>
 						{/* Safari cannot register the web+em3 handler, so there the paste box is the main path. */}
@@ -174,7 +165,7 @@ export function LoginPage() {
 							</p>
 							<div className="join mt-2 w-full">
 								<input className="input input-sm join-item grow" placeholder="web+em3://token=…" value={ssoLink} onChange={e => setSsoLink(e.target.value)} />
-								<button type="button" className="btn btn-sm join-item" disabled={busy || !ssoLink.trim()} onClick={pasteSsoLink}>
+								<button type="button" className="btn btn-sm join-item" disabled={!ssoLink.trim()} onClick={pasteSsoLink}>
 									完成登入
 								</button>
 							</div>
