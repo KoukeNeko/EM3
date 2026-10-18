@@ -4,7 +4,7 @@ import { openFile } from "@/features/course/FilePreview";
 import { useCourseIndex } from "@/features/courses/api";
 import { CourseGlyph, resolveLook } from "@/features/courses/look";
 import { usePrefs } from "@/features/preferences/store";
-import { cleanHtml, fileExt, humanSize } from "@/lib/moodle/files";
+import { cleanHtml, fileExt, humanSize, siteLabel } from "@/lib/moodle/files";
 import { fullDateTime } from "@/lib/time/relative";
 import { useHotkeys } from "@/shared/keyboard/hotkeys";
 import { Empty, ErrorNote, Lines } from "@/shared/ui/States";
@@ -77,11 +77,12 @@ function MailInbox() {
 			<header className="mb-6 flex flex-wrap items-end justify-between gap-4">
 				<div>
 					<h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">信件</h1>
-					<p className="mt-1 text-sm text-base-content/55">站內信。打開信會在學校網站上標為已讀；要寫信或回覆時會開學校網站。</p>
+					<p className="mt-1 text-sm text-base-content/55">
+						{siteLabel()} 站內信。打開信會在 {siteLabel()} 上標為已讀；要寫信或回覆時會開 {siteLabel()}。
+					</p>
 				</div>
 				<a href={mailE3Url()} target="_blank" rel="noreferrer" className="btn btn-sm">
-					<PencilSimpleLineIcon size={16} />
-					在網站寫信
+					<PencilSimpleLineIcon size={16} />在 {siteLabel()} 寫信
 				</a>
 			</header>
 
@@ -274,8 +275,7 @@ function Reader({ id, onBack }: { id: number; onBack: () => void }) {
 						標為未讀
 					</button>
 					<a className="btn btn-sm" href={mailE3Url(id)} target="_blank" rel="noreferrer">
-						<ArrowBendUpLeftIcon size={16} />
-						在網站回覆
+						<ArrowBendUpLeftIcon size={16} />在 {siteLabel()} 回覆
 					</a>
 				</div>
 			</div>
