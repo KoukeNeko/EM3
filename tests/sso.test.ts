@@ -10,7 +10,7 @@ test("md5 matches node:crypto, including multi-block and non-ASCII input", () =>
 });
 
 const base = "https://ecourse2.ccu.edu.tw";
-const link = (siteid: string, ...rest: string[]) => `web+emtech://token=${Buffer.from([siteid, ...rest].join(":::")).toString("base64")}`;
+const link = (siteid: string, ...rest: string[]) => `web+emthree://token=${Buffer.from([siteid, ...rest].join(":::")).toString("base64")}`;
 
 test("decodeSsoToken returns the token when the passport matches", () => {
 	const siteid = md5(base + "pp");
@@ -21,7 +21,7 @@ test("decodeSsoToken returns the token when the passport matches", () => {
 test("decodeSsoToken accepts a percent-encoded link and a bare base64 string", () => {
 	const siteid = md5(base + "pp");
 	assert.equal(decodeSsoToken(encodeURIComponent(link(siteid, "tok123")), base, "pp"), "tok123");
-	assert.equal(decodeSsoToken(link(siteid, "tok123").replace("web+emtech://token=", ""), base, "pp"), "tok123");
+	assert.equal(decodeSsoToken(link(siteid, "tok123").replace("web+emthree://token=", ""), base, "pp"), "tok123");
 });
 
 test("decodeSsoToken rejects a link made for another passport or site", () => {

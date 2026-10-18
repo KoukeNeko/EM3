@@ -3,12 +3,12 @@ import { moodleUrl } from "./site";
 // Browser SSO the way the official Moodle app does it: send the user to
 // admin/tool/mobile/launch.php, which ends by redirecting to
 // `<urlscheme>://token=<base64(md5(wwwroot + passport):::token[:::privatetoken])>`.
-// Moodle only accepts letters, digits and `+.-` in the scheme, so `web+emtech` is the one
+// Moodle only accepts letters, digits and `+.-` in the scheme, so `web+emthree` is the one
 // scheme a web page may register a handler for. Browsers that cannot do that fall back
 // to the user pasting the link from Moodle's "click here to launch the app" page.
 
 // Browsers allow only ASCII letters after `web+` (no digits), or registerProtocolHandler throws.
-export const SCHEME = "web+emtech";
+export const SCHEME = "web+emthree";
 const PENDING_KEY = "em3_sso";
 /** Moodle keeps its launch cookie for 15 minutes. */
 const PENDING_MS = 15 * 60_000;
@@ -23,7 +23,7 @@ interface Pending {
 }
 
 /**
- * Ask the browser to send `web+emtech:` links back to EM3. Call it while the user stays on the page
+ * Ask the browser to send `web+emthree:` links back to EM3. Call it while the user stays on the page
  * (when they pick an SSO school): Chrome answers with a permission prompt, which leaving for Moodle
  * right away would dismiss before the user can allow it.
  */

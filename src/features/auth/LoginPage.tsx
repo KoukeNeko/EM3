@@ -159,16 +159,16 @@ export function LoginPage() {
 							使用學校單一登入（SSO）
 						</button>
 						{"registerProtocolHandler" in navigator && (
-							<p className="text-xs leading-relaxed text-base-content/60">瀏覽器若詢問是否允許開啟 web+emtech 連結，請先按「允許」再登入，登入後就會自動回到 EM3。</p>
+							<p className="text-xs leading-relaxed text-base-content/60">瀏覽器若詢問是否允許開啟 web+emthree 連結，請先按「允許」再登入，登入後就會自動回到 EM3。</p>
 						)}
-						{/* Safari cannot register the web+emtech handler, so there the paste box is the main path. */}
+						{/* Safari cannot register the web+emthree handler, so there the paste box is the main path. */}
 						<details open={!("registerProtocolHandler" in navigator)} className="text-xs text-base-content/60">
 							<summary className="cursor-pointer">單一登入完成後沒有回到 EM3？</summary>
 							<p className="mt-2 leading-relaxed">
 								在 {sso.pageName ?? "Moodle"} 的完成頁面對「{sso.linkText ?? "若應用程式沒有自動開啟，請點選這裡"}」的連結按右鍵複製連結，貼在這裡。
 							</p>
 							<div className="join mt-2 w-full">
-								<input className="input input-sm join-item grow" placeholder="web+emtech://token=…" value={ssoLink} onChange={e => setSsoLink(e.target.value)} />
+								<input className="input input-sm join-item grow" placeholder="web+emthree://token=…" value={ssoLink} onChange={e => setSsoLink(e.target.value)} />
 								<button type="button" className="btn btn-sm join-item" disabled={!ssoLink.trim()} onClick={pasteSsoLink}>
 									完成登入
 								</button>
