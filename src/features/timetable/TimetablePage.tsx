@@ -1,7 +1,7 @@
 import { useCourseIndex } from "@/features/courses/api";
 import { CourseGlyph, resolveLook } from "@/features/courses/look";
 import type { ParsedCourse } from "@/features/courses/parse";
-import { usePrefs } from "@/features/preferences/store";
+import { type TimetableEntry, usePrefs } from "@/features/preferences/store";
 import { PageTitle } from "@/shared/ui/States";
 import { ArrowCounterClockwiseIcon, ArrowSquareOutIcon, PaintBrushIcon } from "@phosphor-icons/react";
 import { gridArrow } from "@/shared/keyboard/hotkeys";
@@ -10,13 +10,16 @@ import { motion } from "motion/react";
 import { useMemo, useRef, useState } from "react";
 import { syllabusUrl } from "./import";
 import { classMoment, useNow } from "./now";
-import { CORE_PERIODS, DAY_LABELS, dayIndex, formatSlots, parseScheduleCode, PERIODS, periodEndMinutes, periodStartMinutes } from "./periods";
+import { DAY_LABELS, dayIndex, formatSlots, overlaps, parseScheduleCode, periodByCode, periodEndMinutes, periodStartMinutes, schoolPeriods } from "./periods";
+import { useManualTimetable, useTimetable } from "./schedule";
 
 export function TimetablePage() {
 	const { currentCourses, current } = useCourseIndex();
 	const looks = usePrefs(s => s.courses);
-	const timetable = usePrefs(s => s.timetable);
+	const timetable = useTimetable();
+	const manual = useManualTimetable();
 	const setTimetable = usePrefs(s => s.setTimetable);
+	const school = schoolPeriods();
 	const [brush, setBrush] = useState<number | null>(null);
 	const now = useNow();
 	const moment = classMoment(timetable, now);
@@ -24,12 +27,14 @@ export function TimetablePage() {
 	const courses = useMemo(() => currentCourses.filter(c => !looks[c.id]?.hidden), [currentCourses, looks]);
 	const byCell = useMemo(() => {
 		const m = new Map<string, number>();
-		for (const [id, e] of Object.entries(timetable)) for (const s of e.slots) m.set(`${s.day}:${s.period}`, Number(id));
+		// A period fills every grid row it overlaps: CCU's 75-minute E covers hourly rows 7 and 8.
+		for (const [id, e] of Object.entries(timetable))
+			for (const s of e.slots) for (const row of school?.rows ?? []) if (periodByCode(s.period) && overlaps(s.period, row)) m.set(`${s.day}:${row}`, Number(id));
 		return m;
-	}, [timetable]);
+	}, [timetable, school]);
 
-	const usedPeriods = new Set(Object.values(timetable).flatMap(e => e.slots.map(s => s.period)));
-	const periods = PERIODS.filter(p => CORE_PERIODS.includes(p) || usedPeriods.has(p.code));
+	const usedRows = new Set([...byCell.keys()].map(k => k.split(":")[1]));
+	const periods = school ? school.periods.filter(p => school.rows.includes(p.code) && (school.core.includes(p.code) || usedRows.has(p.code))) : [];
 	const weekend = Object.values(timetable).some(e => e.slots.some(s => s.day >= 5));
 	const days = weekend ? [0, 1, 2, 3, 4, 5, 6] : [0, 1, 2, 3, 4];
 	const today = dayIndex(now);
@@ -40,13 +45,20 @@ export function TimetablePage() {
 		const owner = byCell.get(`${day}:${period}`);
 		if (owner !== undefined) {
 			const e = timetable[owner];
-			setTimetable(owner, { ...e, slots: e.slots.filter(s => !(s.day === day && s.period === period)) });
+			setTimetable(owner, { ...e, slots: e.slots.filter(s => !(s.day === day && periodByCode(s.period) && overlaps(s.period, period))) });
 			if (owner === brush || brush === null) return;
 		}
 		if (brush === null) return;
 		const e = timetable[brush] ?? { slots: [] };
 		setTimetable(brush, { ...e, slots: [...e.slots, { day, period }] });
 	}
+
+	if (!school)
+		return (
+			<div>
+				<PageTitle title="課表" subtitle="EM3 還沒有這所學校的節次時間，暫時無法顯示課表。" />
+			</div>
+		);
 
 	return (
 		<div>
@@ -108,10 +120,12 @@ export function TimetablePage() {
 				<section className="space-y-2">
 					<p className="flex items-center gap-1.5 px-1 text-xs text-base-content/55">
 						<PaintBrushIcon size={14} />
-						三種設定方式：輸入課綱上的時間代碼（例如 R34-EC114）、點 ↗ 打開課綱查、或選一門課當畫筆再點左邊的格子。
+						{school.fromMoodle
+							? `上課時間已從學校的 Moodle 帶入。要修改時，輸入上課時間（${school.example}），或選一門課當畫筆再點左邊的格子。`
+							: "三種設定方式：輸入課綱上的時間代碼（例如 R34-EC114）、點 ↗ 打開課綱查、或選一門課當畫筆再點左邊的格子。"}
 					</p>
 					{courses.map(c => (
-						<CourseScheduleRow key={c.id} course={c} selected={brush === c.id} onSelect={() => setBrush(b => (b === c.id ? null : c.id))} />
+						<CourseScheduleRow key={c.id} course={c} entry={timetable[c.id]} manual={!!manual[c.id]} selected={brush === c.id} onSelect={() => setBrush(b => (b === c.id ? null : c.id))} />
 					))}
 					{!courses.length && (
 						<p className="px-1 text-sm text-base-content/50">
@@ -128,21 +142,35 @@ export function TimetablePage() {
 	);
 }
 
-function CourseScheduleRow({ course, selected, onSelect }: { course: ParsedCourse; selected: boolean; onSelect: () => void }) {
+function CourseScheduleRow({
+	course,
+	entry,
+	manual,
+	selected,
+	onSelect
+}: {
+	course: ParsedCourse;
+	entry?: TimetableEntry;
+	/** Set by the student, as opposed to filled in from Moodle. */
+	manual: boolean;
+	selected: boolean;
+	onSelect: () => void;
+}) {
 	const look = resolveLook(
 		course,
 		usePrefs(s => s.courses[course.id])
 	);
-	const entry = usePrefs(s => s.timetable[course.id]);
 	const setTimetable = usePrefs(s => s.setTimetable);
-	const code = entry ? formatSlots(entry.slots) + (entry.room ? `-${entry.room}` : "") : "";
+	const school = schoolPeriods();
+	// NYCU codes carry the room after a dash; schools that fill times from Moodle keep the room out of the code.
+	const code = entry ? formatSlots(entry.slots) + (entry.room && !school?.fromMoodle ? `-${entry.room}` : "") : "";
 	const [draft, setDraft] = useState<string | null>(null);
 	const syllabus = syllabusUrl(course);
 
 	function commit() {
 		if (draft === null) return;
 		const parsed = parseScheduleCode(draft);
-		setTimetable(course.id, parsed.slots.length ? parsed : null);
+		setTimetable(course.id, parsed.slots.length ? { ...parsed, room: parsed.room ?? (school?.fromMoodle ? entry?.room : undefined) } : null);
 		setDraft(null);
 	}
 
@@ -158,7 +186,7 @@ function CourseScheduleRow({ course, selected, onSelect }: { course: ParsedCours
 			</button>
 			<input
 				className="input input-xs w-28 font-mono uppercase placeholder:normal-case placeholder:font-sans"
-				placeholder="例：T34"
+				placeholder={school?.example}
 				value={draft ?? code}
 				onChange={e => setDraft(e.target.value)}
 				onBlur={commit}
@@ -174,11 +202,11 @@ function CourseScheduleRow({ course, selected, onSelect }: { course: ParsedCours
 				<span className="size-6 shrink-0" aria-hidden />
 			)}
 			<button
-				className={`btn btn-ghost btn-xs btn-square ${entry ? "" : "invisible"}`}
+				className={`btn btn-ghost btn-xs btn-square ${manual ? "" : "invisible"}`}
 				onClick={() => setTimetable(course.id, null)}
-				aria-label={`清除${look.title}的上課時間`}
-				title="清除時間"
-				tabIndex={entry ? 0 : -1}
+				aria-label={`清除${look.title}自訂的上課時間`}
+				title={school?.fromMoodle ? "清除自訂時間，改用 Moodle 上的時間" : "清除時間"}
+				tabIndex={manual ? 0 : -1}
 			>
 				<ArrowCounterClockwiseIcon size={14} />
 			</button>
