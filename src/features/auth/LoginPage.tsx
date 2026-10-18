@@ -176,21 +176,41 @@ export function LoginPage() {
 											aria-label="複製 chrome://settings/handlers"
 											className="mx-1 inline-flex items-center gap-1 rounded-field bg-base-content/10 px-1.5 py-0.5 font-mono text-base-content/80 transition-colors hover:bg-base-content/15"
 											onClick={() =>
-												navigator.clipboard.writeText("chrome://settings/handlers").then(() => {
-													setCopied(true);
-													setTimeout(() => setCopied(false), 1500);
-												})
+												navigator.clipboard
+													.writeText("chrome://settings/handlers")
+													.then(() => {
+														setCopied(true);
+														setTimeout(() => setCopied(false), 1500);
+													})
+													// Clipboard refused: the URL stays on screen to copy by hand.
+													.catch(() => {})
 											}
 										>
 											chrome://settings/handlers
 											{copied ? <CheckIcon size={12} className="text-success" /> : <CopyIcon size={12} />}
 										</button>
-										移除封鎖後重新整理本頁。
+										移除封鎖後，
+										{/* A click, not a reload: the page may reopen on the remembered school without picking it again. */}
+										<button type="button" className="link" onClick={registerSsoHandler}>
+											重新詢問
+										</button>
+										。
 									</p>
 								</div>
 							</div>
 						)}
-						<button type="button" className={`btn w-full ${passwordLogin ? "btn-outline" : "btn-neutral btn-lg"}`} disabled={busy} onClick={() => startSso(baseUrl, sso.provider, remember, next)}>
+						<button
+							type="button"
+							className={`btn w-full ${passwordLogin ? "btn-outline" : "btn-neutral btn-lg"}`}
+							disabled={busy}
+							onClick={() => {
+								try {
+									startSso(baseUrl, sso.provider, remember, next);
+								} catch {
+									setError("無法開始單一登入，請確認瀏覽器允許此網站儲存資料。");
+								}
+							}}
+						>
 							使用學校單一登入（SSO）
 						</button>
 						{/* Safari cannot register the web+emthree handler, so there the paste box is the main path. */}
