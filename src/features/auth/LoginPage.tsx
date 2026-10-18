@@ -165,7 +165,7 @@ export function LoginPage() {
 					<div className="mt-4 space-y-3">
 						{/* Chrome asks when the school is picked, so this sits above the button it precedes. */}
 						{"registerProtocolHandler" in navigator && (
-							<div className="flex gap-3 rounded-box border border-base-content/10 bg-base-content/5 p-3.5">
+							<div className="flex gap-3 rounded-field border border-base-content/10 bg-base-content/5 p-3.5">
 								<BellRingingIcon size={18} weight="duotone" className="mt-0.5 shrink-0 text-primary" />
 								<div className="min-w-0 space-y-1.5">
 									<p className="text-sm leading-relaxed">瀏覽器詢問是否開啟 web+emthree 連結時，請選擇「允許」；登入完成後將自動返回 EM3。</p>
@@ -194,7 +194,7 @@ export function LoginPage() {
 							使用學校單一登入（SSO）
 						</button>
 						{/* Safari cannot register the web+emthree handler, so there the paste box is the main path. */}
-						<details open={!("registerProtocolHandler" in navigator)} className="group rounded-box border border-base-content/10">
+						<details open={!("registerProtocolHandler" in navigator)} className="group rounded-field border border-base-content/10">
 							<summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3.5 py-2.5 text-xs text-base-content/70 [&::-webkit-details-marker]:hidden">
 								單一登入完成後沒有回到 EM3？
 								<CaretDownIcon size={14} className="shrink-0 transition-transform group-open:rotate-180" />
