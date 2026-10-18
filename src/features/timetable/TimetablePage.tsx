@@ -6,12 +6,17 @@ import { PageTitle } from "@/shared/ui/States";
 import { ArrowCounterClockwiseIcon, ArrowSquareOutIcon, PaintBrushIcon } from "@phosphor-icons/react";
 import { gridArrow } from "@/shared/keyboard/hotkeys";
 import { Link } from "@tanstack/react-router";
-import { motion } from "motion/react";
-import { useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { syllabusUrl } from "./import";
-import { classMoment, useNow } from "./now";
+import { blocksFor, blockTime, classMoment, useNow } from "./now";
 import { DAY_LABELS, dayIndex, formatSlots, overlaps, parseScheduleCode, periodByCode, periodEndMinutes, periodStartMinutes, schoolPeriods } from "./periods";
 import { useManualTimetable, useTimetable } from "./schedule";
+
+/** Height of one grid row. Rows are even, like the school's own timetable, not stretched to the real breaks. */
+const ROW = 64;
+/** Room above the first row and below the last. */
+const PAD = 6;
 
 export function TimetablePage() {
 	const { currentCourses, current } = useCourseIndex();
@@ -23,8 +28,15 @@ export function TimetablePage() {
 	const [brush, setBrush] = useState<number | null>(null);
 	const now = useNow();
 	const moment = classMoment(timetable, now);
+	const grid = useRef<HTMLDivElement>(null);
+	// The staggered entrance plays once, not on every edit.
+	const entered = useRef(false);
+	useEffect(() => {
+		entered.current = true;
+	}, []);
 
 	const courses = useMemo(() => currentCourses.filter(c => !looks[c.id]?.hidden), [currentCourses, looks]);
+	const blocks = useMemo(() => (school ? blocksFor(timetable) : []), [timetable, school]);
 	const byCell = useMemo(() => {
 		const m = new Map<string, number>();
 		// A period fills every grid row it overlaps: CCU's 75-minute E covers hourly rows 7 and 8.
@@ -33,12 +45,50 @@ export function TimetablePage() {
 		return m;
 	}, [timetable, school]);
 
-	const usedRows = new Set([...byCell.keys()].map(k => k.split(":")[1]));
-	const periods = school ? school.periods.filter(p => school.rows.includes(p.code) && (school.core.includes(p.code) || usedRows.has(p.code))) : [];
-	const weekend = Object.values(timetable).some(e => e.slots.some(s => s.day >= 5));
+	if (!school)
+		return (
+			<div>
+				<PageTitle title="課表" subtitle="EM3 還沒有這所學校的節次時間，暫時無法顯示課表。" />
+			</div>
+		);
+
+	// The view spans the school's usual day plus any class outside it, in whole periods.
+	const rows = school.periods.filter(p => school.rows.includes(p.code));
+	const core = rows.filter(p => school.core.includes(p.code));
+	const from = Math.min(...core.map(p => periodStartMinutes(p.code)), ...blocks.map(b => b.start));
+	const to = Math.max(...core.map(p => periodEndMinutes(p.code)), ...blocks.map(b => b.end));
+	const inView = (code: string) => periodStartMinutes(code) < to && periodEndMinutes(code) > from;
+	// Schools that draw their day in blocks (CCU's Ⅰ-Ⅴ) show whole blocks, as on the school's own timetable.
+	const sections = school.sections?.filter(s => s.rows.some(inView));
+	const shown = rows.filter(p => (sections ? sections.some(s => s.rows.includes(p.code)) : inView(p.code)));
+	const sectionStart = new Set(sections?.map(s => s.rows[0]));
+	const rowTop = new Map(shown.map((p, i) => [p.code, PAD + i * ROW]));
+	const height = PAD * 2 + shown.length * ROW;
+	// A second axis (CCU's A-J) splits each section evenly: three hourly rows hold two lettered periods.
+	const secondaryBox = new Map<string, { top: number; height: number }>();
+	for (const sec of sections ?? []) {
+		const start = periodStartMinutes(sec.rows[0]);
+		const end = periodEndMinutes(sec.rows.at(-1)!);
+		const inside = school.periods.filter(p => !school.rows.includes(p.code) && periodStartMinutes(p.code) >= start && periodStartMinutes(p.code) < end);
+		const h = (sec.rows.length * ROW) / inside.length;
+		inside.forEach((p, j) => secondaryBox.set(p.code, { top: rowTop.get(sec.rows[0])! + j * h, height: h }));
+	}
+	const secondary = school.periods.filter(p => secondaryBox.has(p.code));
+	const box = (code: string) => (rowTop.has(code) ? { top: rowTop.get(code)!, height: ROW } : secondaryBox.get(code));
+	// The now line moves through each row in proportion to its period, and waits at the next row during breaks.
+	const yAt = (min: number) => {
+		for (const p of shown) {
+			const start = periodStartMinutes(p.code);
+			const end = periodEndMinutes(p.code);
+			if (min < start) return rowTop.get(p.code)!;
+			if (min < end) return rowTop.get(p.code)! + ((min - start) / (end - start)) * ROW;
+		}
+		return PAD + shown.length * ROW;
+	};
+
+	const weekend = blocks.some(b => b.day >= 5);
 	const days = weekend ? [0, 1, 2, 3, 4, 5, 6] : [0, 1, 2, 3, 4];
 	const today = dayIndex(now);
-	const grid = useRef<HTMLTableElement>(null);
 	const minute = now.getHours() * 60 + now.getMinutes();
 
 	function toggle(day: number, period: string) {
@@ -53,11 +103,38 @@ export function TimetablePage() {
 		setTimetable(brush, { ...e, slots: [...e.slots, { day, period }] });
 	}
 
-	if (!school)
-		return (
-			<div>
-				<PageTitle title="課表" subtitle="EM3 還沒有這所學校的節次時間，暫時無法顯示課表。" />
-			</div>
+	// A period lights up only while it runs and today has a class in it.
+	const isNow = (code: string) => {
+		const start = periodStartMinutes(code);
+		const end = periodEndMinutes(code);
+		return minute >= start && minute < end && blocks.some(b => b.day === today && b.start < end && start < b.end);
+	};
+	// Gutter periods are the same quiet cards as the course list beside the grid, from their real start to end.
+	// The period running now lights up; on CCU an hourly and a lettered period can both be lit.
+	const LIT = {
+		background: "color-mix(in oklab, var(--color-primary) 14%, var(--color-base-100))",
+		boxShadow: "0 0 0 2px var(--color-primary), 0 0 14px color-mix(in oklab, var(--color-primary) 45%, transparent)"
+	};
+	const tile = (key: string, at: { top: number; height: number }, lit: boolean, tone: string, children: React.ReactNode) => (
+		<span
+			key={key}
+			className={`card-quiet absolute inset-x-0 flex flex-col items-center justify-center leading-tight tabular-nums ${lit ? "text-primary" : tone}`}
+			style={{ top: at.top + 2, height: at.height - 4, ...(lit ? LIT : undefined) }}
+		>
+			{children}
+		</span>
+	);
+	const label = (p: { code: string; start: string; end: string }, secondaryAxis: boolean) =>
+		tile(
+			p.code,
+			box(p.code)!,
+			isNow(p.code),
+			secondaryAxis ? "text-base-content/45" : "text-base-content/65",
+			<>
+				<span className="text-xs font-semibold">{p.code.toUpperCase()}</span>
+				<span className="text-[0.7rem]">{p.start}</span>
+				<span className="text-[0.7rem] opacity-70">{p.end}</span>
+			</>
 		);
 
 	return (
@@ -66,55 +143,101 @@ export function TimetablePage() {
 
 			<div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_22rem]">
 				<section className="card-quiet overflow-x-auto">
-					<table ref={grid} onKeyDown={e => gridArrow(e, grid.current)} className="w-full min-w-[34rem] table-fixed border-collapse text-xs" aria-label="每週課表">
-						<thead>
-							<tr>
-								<th className="w-16" />
-								{days.map(d => (
-									<th key={d} className={`py-2.5 font-medium ${d === today ? "text-primary" : "text-base-content/50"}`}>
-										週{DAY_LABELS[d]}
-									</th>
-								))}
-							</tr>
-						</thead>
-						<tbody>
-							{periods.map((p, pi) => {
-								const nowRow = minute >= periodStartMinutes(p.code) - 10 && minute < periodEndMinutes(p.code);
-								return (
-									<tr key={p.code} className="border-t hairline">
-										<td className={`py-1 pr-2 text-right align-top tabular-nums ${nowRow ? "text-primary" : "text-base-content/45"}`}>
-											<span className="block font-semibold">{p.code.toUpperCase()}</span>
-											<span className="block text-[0.65rem]">{p.start}</span>
-										</td>
-										{days.map((d, di) => {
-											const id = byCell.get(`${d}:${p.code}`);
-											const course = id !== undefined ? currentCourses.find(c => c.id === id) : undefined;
-											const look = course ? resolveLook(course, looks[course.id]) : undefined;
-											const live = id !== undefined && moment.now?.courseId === id && d === today;
+					<div
+						ref={grid}
+						onKeyDown={e => gridArrow(e, grid.current)}
+						role="group"
+						aria-label="每週課表"
+						className="grid min-w-[36rem] pr-2"
+						style={{ gridTemplateColumns: `${secondary.length ? "8.75rem" : "4.25rem"} repeat(${days.length}, minmax(0, 1fr))` }}
+					>
+						{/* The header's bottom rule is the table's top line, across the gutter too. */}
+						<div className="border-b hairline" />
+						{days.map(d => (
+							<div key={d} className={`border-b hairline py-3 text-center text-xs font-medium ${d === today ? "text-primary" : "text-base-content/50"}`}>
+								週{DAY_LABELS[d]}
+							</div>
+						))}
+
+						<div className="relative" style={{ height }} aria-hidden>
+							<div className="absolute inset-0 flex gap-1 px-1.5">
+								{sections && (
+									<div className="relative w-6 shrink-0">
+										{sections.map(s =>
+											tile(s.label, { top: rowTop.get(s.rows[0])!, height: s.rows.length * ROW }, false, "text-base-content/45", <span className="text-xs font-semibold">{s.label}</span>)
+										)}
+									</div>
+								)}
+								<div className="relative flex-1">{shown.map(p => label(p, false))}</div>
+								{secondary.length > 0 && <div className="relative flex-1">{secondary.map(p => label(p, true))}</div>}
+							</div>
+						</div>
+
+						{days.map((d, di) => (
+							<div key={d} className={`relative border-l hairline ${d === today ? "bg-primary/[0.03]" : ""}`} style={{ height }}>
+								{shown.map((p, pi) => {
+									const id = byCell.get(`${d}:${p.code}`);
+									const course = id !== undefined ? currentCourses.find(c => c.id === id) : undefined;
+									return (
+										<button
+											key={p.code}
+											onClick={() => toggle(d, p.code)}
+											data-cell={`${pi}:${di}`}
+											tabIndex={pi === 0 && di === 0 ? 0 : -1}
+											className={`absolute inset-x-0 ${pi === 0 ? "" : `border-t ${sectionStart.has(p.code) ? "border-base-content/25" : "hairline"}`} transition-colors active:bg-base-content/10 ${brush !== null ? "hover:bg-base-content/[0.06]" : ""}`}
+											style={{ top: rowTop.get(p.code), height: ROW }}
+											aria-label={`週${DAY_LABELS[d]} 第 ${p.code} 節${course ? `：${resolveLook(course, looks[course.id]).title}` : ""}`}
+										/>
+									);
+								})}
+
+								<AnimatePresence initial={false}>
+									{blocks
+										.filter(b => b.day === d)
+										.map((b, i) => {
+											const course = currentCourses.find(c => c.id === b.courseId);
+											if (!course) return null;
+											const look = resolveLook(course, looks[course.id]);
+											const live = moment.now?.courseId === b.courseId && d === today;
+											const first = box(b.from);
+											const last = box(b.to);
+											if (!first || !last) return null;
+											// Inset 4 px on every side, the same as the gap between day columns.
+											const h = last.top + last.height - first.top - 8;
 											return (
-												<td key={d} className={`h-12 p-0.5 ${d === today ? "bg-primary/[0.03]" : ""}`}>
-													<button
-														onClick={() => toggle(d, p.code)}
-														data-cell={`${pi}:${di}`}
-														tabIndex={pi === 0 && di === 0 ? 0 : -1}
-														className={`flex size-full items-center justify-center rounded-lg px-1 text-center leading-tight transition ${look ? "" : brush !== null ? "hover:bg-base-content/[0.06]" : ""}`}
-														style={
-															look
-																? { backgroundColor: `color-mix(in oklab, ${look.color} ${live ? 34 : 18}%, transparent)`, color: `color-mix(in oklab, ${look.color} 75%, var(--color-base-content))` }
-																: undefined
-														}
-														aria-label={`週${DAY_LABELS[d]} 第 ${p.code} 節${look ? `：${look.title}` : ""}`}
-													>
-														{look && <span className="line-clamp-2 font-medium">{look.title}</span>}
-													</button>
-												</td>
+												<motion.div
+													key={`${b.courseId}:${b.from}`}
+													initial={{ opacity: 0, scale: 0.96 }}
+													animate={{ opacity: 1, scale: 1 }}
+													exit={{ opacity: 0, scale: 0.96 }}
+													transition={{ duration: 0.2, delay: entered.current ? 0 : Math.min(i * 0.06 + di * 0.04, 0.4) }}
+													className={`pointer-events-none absolute inset-x-1 overflow-hidden rounded-lg px-2 py-1.5 leading-tight ${live ? "ring-2" : ""}`}
+													style={{
+														top: first.top + 4,
+														height: h,
+														backgroundColor: `color-mix(in oklab, ${look.color} ${live ? 34 : 20}%, var(--color-base-100))`,
+														color: `color-mix(in oklab, ${look.color} 70%, var(--color-base-content))`,
+														["--tw-ring-color" as string]: look.color
+													}}
+												>
+													<span className={`text-sm font-medium ${h < 90 ? "line-clamp-1" : "line-clamp-2"}`}>{look.title}</span>
+													<span className="mt-0.5 block truncate text-xs tabular-nums opacity-80">
+														{blockTime(b)}
+														{h < 90 && b.room ? ` · ${b.room}` : ""}
+													</span>
+													{h >= 90 && b.room && <span className="block truncate text-xs opacity-65">{b.room}</span>}
+												</motion.div>
 											);
 										})}
-									</tr>
-								);
-							})}
-						</tbody>
-					</table>
+								</AnimatePresence>
+								{d === today && shown.length > 0 && minute >= periodStartMinutes(shown[0].code) && minute <= periodEndMinutes(shown.at(-1)!.code) && (
+									<div aria-hidden className="pointer-events-none absolute inset-x-0 z-10 h-0.5 bg-error" style={{ top: yAt(minute) }}>
+										<span className="absolute -top-1 -left-1 size-2.5 rounded-full bg-error" />
+									</div>
+								)}
+							</div>
+						))}
+					</div>
 				</section>
 
 				<section className="space-y-2">
