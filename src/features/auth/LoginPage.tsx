@@ -180,7 +180,7 @@ export function LoginPage() {
 							<summary className="cursor-pointer">單一登入完成後沒有回到 EM3？</summary>
 							<ol className="mt-2 list-decimal space-y-0.5 ps-4 leading-relaxed">
 								<li>
-									在 {sso.pageName ?? "Moodle"} 的完成頁面，長按或按右鍵複製「{sso.linkText ?? "若應用程式沒有自動開啟，請點選這裡"}」的連結。
+									在 {site?.label ?? "Moodle"} 的完成頁面，長按或按右鍵複製「{sso.linkText ?? "若應用程式沒有自動開啟，請點選這裡"}」的連結。
 								</li>
 								<li>回到本分頁，將連結貼至下方欄位。</li>
 								<li>選擇「完成登入」。</li>

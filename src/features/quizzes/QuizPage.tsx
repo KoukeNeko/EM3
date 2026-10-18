@@ -2,7 +2,7 @@ import { TASK_STATE_LABEL } from "@/features/assignments/api";
 import { Fact, FileChips } from "@/features/assignments/AssignmentPage";
 import { useCourseIndex, useSiteInfo } from "@/features/courses/api";
 import { copyWhenReady } from "@/lib/clipboard";
-import { cleanHtml, e3Link } from "@/lib/moodle/files";
+import { cleanHtml, e3Link, siteLabel } from "@/lib/moodle/files";
 import { countdown, deadlinePhrase, fullDateTime } from "@/lib/time/relative";
 import { CourseTag } from "@/shared/ui/CourseTag";
 import { E3Away } from "@/shared/ui/LeaveToE3";
@@ -33,7 +33,7 @@ import {
 	gradeFromAttempts,
 	type Quiz,
 	type QuizAttempt,
-	QUIZ_E3_REASON,
+	quizAwayReason,
 	quizNotes,
 	quizState,
 	scaledGrade,
@@ -78,7 +78,7 @@ export function QuizPage() {
 	const used = attempts.filter(a => a.state !== "abandoned").length;
 	const canAttempt = (!quiz.timeclose || quiz.timeclose > now) && quiz.timeopen <= now && (!quiz.attempts || used < quiz.attempts);
 	const overall = best.data?.hasgrade && best.data.grade !== undefined ? best.data.grade : gradeFromAttempts(quiz, attempts);
-	const notice = { url: e3Link(`/mod/quiz/view.php?id=${quiz.coursemodule}`), title: quiz.name, reason: QUIZ_E3_REASON, notes: quizNotes(quiz, attempts) };
+	const notice = { url: e3Link(`/mod/quiz/view.php?id=${quiz.coursemodule}`), title: quiz.name, reason: quizAwayReason(), notes: quizNotes(quiz, attempts) };
 
 	return (
 		<div className="mx-auto max-w-5xl">
@@ -138,10 +138,10 @@ export function QuizPage() {
 					{(canAttempt || unfinished) && (
 						<section className="card-quiet p-4">
 							<E3Away notice={notice} className="btn btn-primary w-full">
-								{unfinished ? "回到 E3 繼續作答" : attempts.length ? "到 E3 再作答一次" : "到 E3 作答"}
+								{unfinished ? `回到 ${siteLabel()} 繼續作答` : attempts.length ? `到 ${siteLabel()} 再作答一次` : `到 ${siteLabel()} 作答`}
 								<ArrowSquareOutIcon size={16} />
 							</E3Away>
-							<p className="mt-2 text-xs text-base-content/50">測驗在 E3 上作答，EM3 只顯示結果。</p>
+							<p className="mt-2 text-xs text-base-content/50">測驗在 {siteLabel()} 上作答，EM3 只顯示結果。</p>
 							<PracticeCopy quiz={quiz} unfinished={unfinished} used={used} courseName={courseName} lang={lang} onLang={setLang} />
 						</section>
 					)}
@@ -159,7 +159,7 @@ export function QuizPage() {
 					)}
 					{!canAttempt && !unfinished && (
 						<a className="btn btn-ghost btn-sm w-full" href={notice.url} target="_blank" rel="noreferrer">
-							<ArrowSquareOutIcon size={15} />在 E3 開啟這份測驗
+							<ArrowSquareOutIcon size={15} />在 {siteLabel()} 開啟這份測驗
 						</a>
 					)}
 				</aside>
@@ -232,8 +232,10 @@ function AttemptReview({ quiz, attempt, courseName, lang, onLang }: { quiz: Quiz
 		return (
 			<section className="card-quiet p-5 text-sm">
 				<h2 className="mb-1 font-semibold">第 {attempt.attempt} 次作答的結果</h2>
-				<p className="text-base-content/60">E3 目前不開放檢閱這次作答，通常是老師設定成測驗關閉後才能看。</p>
-				<p className="mt-1 text-xs text-base-content/45">E3 回覆：{review.error.message}</p>
+				<p className="text-base-content/60">{siteLabel()} 目前不開放檢閱這次作答，通常是老師設定成測驗關閉後才能看。</p>
+				<p className="mt-1 text-xs text-base-content/45">
+					{siteLabel()} 回覆：{review.error.message}
+				</p>
 			</section>
 		);
 	if (review.isPending) return <Lines n={5} />;
@@ -427,7 +429,11 @@ function PracticeCopy({
 			<div className="mt-1 flex justify-end">
 				<LangPicker lang={lang} onLang={onLang} />
 			</div>
-			{error && <p className="mt-2 text-xs text-error">沒辦法開始或讀取作答：{error}。可以先到 E3 開始作答，再回來複製。</p>}
+			{error && (
+				<p className="mt-2 text-xs text-error">
+					沒辦法開始或讀取作答：{error}。可以先到 {siteLabel()} 開始作答，再回來複製。
+				</p>
+			)}
 			{done && (
 				<div className="mt-2 rounded-xl bg-success/10 p-3 text-sm">
 					<p className="flex items-center gap-1.5 font-medium">
@@ -436,7 +442,7 @@ function PracticeCopy({
 					</p>
 					{!done.copied && <textarea readOnly className="textarea mt-2 h-40 w-full font-mono text-xs" value={done.text} onFocus={e => e.currentTarget.select()} />}
 					<a className="link mt-1 inline-flex items-center gap-1 text-xs" href={attemptUrl} target="_blank" rel="noreferrer">
-						到 E3 作答並提交 <ArrowSquareOutIcon size={12} />
+						到 {siteLabel()} 作答並提交 <ArrowSquareOutIcon size={12} />
 					</a>
 				</div>
 			)}
@@ -444,14 +450,14 @@ function PracticeCopy({
 			<dialog ref={dialog} className="modal modal-bottom sm:modal-middle" aria-labelledby="start-copy-title">
 				<div className="modal-box max-w-md">
 					<h3 id="start-copy-title" className="text-lg font-semibold">
-						在 E3 開始作答並複製題目
+						在 {siteLabel()} 開始作答並複製題目
 					</h3>
 					<ul className="mt-3 list-disc space-y-1.5 pl-5 text-sm text-base-content/75">
 						<li>
-							會在 E3 開始第 {used + 1} 次作答{quiz.timelimit ? `，限時 ${Math.round(quiz.timelimit / 60)} 分鐘會馬上開始計時` : "。這份測驗不限時"}。
+							會在 {siteLabel()} 開始第 {used + 1} 次作答{quiz.timelimit ? `，限時 ${Math.round(quiz.timelimit / 60)} 分鐘會馬上開始計時` : "。這份測驗不限時"}。
 						</li>
 						<li>{left !== null ? `會用掉一次作答機會，之後還剩 ${left - 1} 次。` : "這份測驗不限作答次數。"}</li>
-						<li>EM3 不會幫你作答或提交，複製後請回到 E3 作答並按「提交」。</li>
+						<li>EM3 不會幫你作答或提交，複製後請回到 {siteLabel()} 作答並按「提交」。</li>
 						<li className="font-medium text-base-content">請先確認這門課允許和 AI 討論；有些課把這視為作弊。</li>
 					</ul>
 					<div className="modal-action">

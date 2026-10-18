@@ -1,5 +1,6 @@
 import type { TaskState } from "@/features/assignments/api";
 import { call, callMany } from "@/lib/moodle/client";
+import { siteLabel } from "@/lib/moodle/files";
 import type { InlineFile } from "@/lib/moodle/types";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
@@ -163,7 +164,7 @@ export function quizNotes(q: Quiz, attempts: QuizAttempt[]): string[] {
 	return notes;
 }
 
-export const QUIZ_E3_REASON = "測驗要在 E3 上作答。EM3 只讀取測驗的時間和你的作答紀錄，不提供作答介面，以免計時或作答紀錄出錯。";
+export const quizAwayReason = () => `測驗要在 ${siteLabel()} 上作答。EM3 只讀取測驗的時間和你的作答紀錄，不提供作答介面，以免計時或作答紀錄出錯。`;
 
 /** Questions of an attempt in progress, all pages at once. Read-only, unlike mod_quiz_get_attempt_data, which also moves the attempt's current page. */
 export async function attemptQuestions(attemptId: number) {

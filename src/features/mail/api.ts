@@ -1,6 +1,5 @@
-import { call as moodleCall, getMoodleBaseUrl } from "@/lib/moodle/client";
-import { MOODLE_SITES } from "@/lib/moodle/site";
-import { e3Link } from "@/lib/moodle/files";
+import { call as moodleCall } from "@/lib/moodle/client";
+import { currentSite, e3Link } from "@/lib/moodle/files";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 // Internal mail: NYCU E3 runs local_dcpcmail, a fork of the local_mail plugin
@@ -8,7 +7,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 // have neither. The web service can list, search and read mail and toggle
 // unread, but it cannot send — composing and replying open the site instead.
 
-const plugin = () => MOODLE_SITES.find(s => s.baseUrl === getMoodleBaseUrl())?.mailPlugin;
+const plugin = () => currentSite()?.mailPlugin;
 
 export const mailSupported = () => !!plugin();
 

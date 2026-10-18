@@ -7,6 +7,7 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AnnouncementList } from "./AnnouncementList";
 import { useAnnouncements } from "./api";
+import { siteLabel } from "@/lib/moodle/files";
 
 export function AnnouncementsPage() {
 	const { course: only } = useSearch({ from: "/app/announcements" });
@@ -27,7 +28,7 @@ export function AnnouncementsPage() {
 
 	return (
 		<div>
-			<PageTitle title="公告" subtitle={`本學期 ${active.length} 門課的公告，新的在上面。未讀狀態只記在這個瀏覽器，不會影響 E3。`}>
+			<PageTitle title="公告" subtitle={`本學期 ${active.length} 門課的公告，新的在上面。未讀狀態只記在這個瀏覽器，不會影響 ${siteLabel()}。`}>
 				{unread.length > 0 && (
 					<button className="btn btn-sm btn-ghost" onClick={() => markSeen(unread.map(a => a.discussion))}>
 						<CheckIcon size={15} />

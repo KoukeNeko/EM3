@@ -1,6 +1,6 @@
 import DOMPurify from "dompurify";
 import { getMoodleBaseUrl, getToken } from "./client";
-import { moodleUrl } from "./site";
+import { MOODLE_SITES, moodleUrl } from "./site";
 
 // Files in WS responses point at /webservice/pluginfile.php and need the token
 // appended. Rich text embeds the browser-session form (/pluginfile.php), which
@@ -29,6 +29,10 @@ export function fileUrl(url: string, opts: { download?: boolean } = {}): string 
 	}
 	return u.toString();
 }
+
+export const currentSite = () => MOODLE_SITES.find(s => s.baseUrl === getMoodleBaseUrl());
+/** The signed-in school's name for its Moodle, for UI wording. */
+export const siteLabel = () => currentSite()?.label ?? "Moodle";
 
 /** Link to the same page on the configured Moodle site. */
 export const moodleLink = (path: string) => moodleUrl(getMoodleBaseUrl(), path);

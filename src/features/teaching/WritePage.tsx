@@ -1,5 +1,5 @@
 import { useCourseIndex } from "@/features/courses/api";
-import { cleanHtml, e3Link } from "@/lib/moodle/files";
+import { cleanHtml, e3Link, siteLabel } from "@/lib/moodle/files";
 import { MarkdownEditor, markdownToHtml } from "@/shared/editor/MarkdownEditor";
 import { CourseTag } from "@/shared/ui/CourseTag";
 import { ArrowLeftIcon, ArrowSquareOutIcon, CheckIcon, CopyIcon } from "@phosphor-icons/react";
@@ -58,7 +58,7 @@ export function WritePage() {
 				{course && <CourseTag course={course} link />}
 				<h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">寫教材</h1>
 				<p className="mt-1 max-w-2xl text-sm text-base-content/55">
-					E3 沒有開放新增教材的 API，所以這裡是寫字的地方：用按鈕排版或直接寫 Markdown，按「複製」後在 E3 的表單貼上。程式碼、表格、數學式（$…$）都會保留。草稿存在這個瀏覽器。
+					{siteLabel()} 沒有開放新增教材的 API，所以這裡是寫字的地方：用按鈕排版或直接寫 Markdown，按「複製」後在 {siteLabel()} 的表單貼上。程式碼、表格、數學式（$…$）都會保留。草稿存在這個瀏覽器。
 				</p>
 			</header>
 			<div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_20rem]">
@@ -73,7 +73,7 @@ export function WritePage() {
 				<aside className="card-quiet space-y-4 self-start p-4 lg:sticky lg:top-6">
 					<button className="btn btn-primary w-full" disabled={!md.trim()} onClick={() => void copy()}>
 						{copied ? <CheckIcon size={16} /> : <CopyIcon size={16} />}
-						{copied ? "已複製，去 E3 貼上" : "複製（可直接貼進 E3）"}
+						{copied ? `已複製，去 ${siteLabel()} 貼上` : `複製（可直接貼進 ${siteLabel()}）`}
 					</button>
 					<div>
 						<p className="mb-2 text-xs font-semibold text-base-content/50">貼到哪裡</p>
@@ -92,7 +92,7 @@ export function WritePage() {
 						</ul>
 					</div>
 					<details className="text-sm">
-						<summary className="cursor-pointer text-base-content/55">預覽在 E3 的樣子</summary>
+						<summary className="cursor-pointer text-base-content/55">預覽在 {siteLabel()} 的樣子</summary>
 						<div className="prose-e3 mt-2 max-h-80 overflow-auto rounded-lg bg-base-200 p-3" dangerouslySetInnerHTML={{ __html: cleanHtml(html) }} />
 					</details>
 				</aside>

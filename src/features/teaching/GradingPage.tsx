@@ -2,7 +2,7 @@ import { useAssignments } from "@/features/assignments/api";
 import { FileIcon } from "@/features/course/FileIcon";
 import { openFile } from "@/features/course/FilePreview";
 import { useCourseIndex } from "@/features/courses/api";
-import { cleanHtml, e3Link, fileExt, humanSize, linkify } from "@/lib/moodle/files";
+import { cleanHtml, e3Link, fileExt, humanSize, linkify, siteLabel } from "@/lib/moodle/files";
 import type { InlineFile } from "@/lib/moodle/types";
 import { fullDateTime } from "@/lib/time/relative";
 import { MarkdownEditor, markdownToHtml } from "@/shared/editor/MarkdownEditor";
@@ -162,7 +162,7 @@ export function GradingPage() {
 				<Stat label="待評分" value={counts.todo} tone={counts.todo ? "text-warning" : undefined} />
 			</div>
 
-			{max <= 0 && <div className="alert alert-soft alert-warning mb-5 text-sm">這份作業用量尺（等第）評分，EM3 目前只支援分數制。可以在這裡看繳交內容，評分請到 E3。</div>}
+			{max <= 0 && <div className="alert alert-soft alert-warning mb-5 text-sm">這份作業用量尺（等第）評分，EM3 目前只支援分數制。可以在這裡看繳交內容，評分請到 {siteLabel()}。</div>}
 
 			<div className="grid grid-cols-1 gap-5 lg:grid-cols-[18rem_1fr]">
 				<aside className={`min-w-0 ${current ? "hidden lg:block" : ""}`}>
@@ -198,7 +198,7 @@ export function GradingPage() {
 													{sids[p.id]}
 													{isAuditor(p) && " · 旁聽"}
 													{p.suspended && <span className="text-warning"> · 選課已失效</span>}
-													{p.outsideTable && !p.suspended && <span className="text-warning"> · 不在 E3 評分表</span>}
+													{p.outsideTable && !p.suspended && <span className="text-warning"> · 不在 {siteLabel()} 評分表</span>}
 												</span>
 											</span>
 											{graded ? (
@@ -430,7 +430,7 @@ function StudentPanel({ assignmentId, p, max, onDone, onBack }: { assignmentId: 
 					{saved && !save.isPending && (
 						<p className="flex items-center gap-1 text-xs text-success">
 							<CheckCircleIcon size={14} weight="fill" />
-							已儲存到 E3，學生看得到
+							已儲存到 {siteLabel()}，學生看得到
 						</p>
 					)}
 					{save.error && <p className="text-xs text-error">儲存失敗：{save.error.message}</p>}

@@ -6,6 +6,7 @@ import { countdown } from "@/lib/time/relative";
 import { CourseTag } from "@/shared/ui/CourseTag";
 import { Due } from "@/shared/ui/Time";
 import { CaretRightIcon, CheckCircleIcon, ExamIcon, LightningIcon, PaperclipIcon } from "@phosphor-icons/react";
+import { siteLabel } from "@/lib/moodle/files";
 
 const STATE_TONE: Record<Task["state"], string> = {
 	upcoming: "badge-ghost",
@@ -46,7 +47,7 @@ export function TaskRow({ t, showCourse = true }: { t: Task; showCourse?: boolea
 					{showCourse && <CourseTag course={t.course} />}
 					{t.due ? <Due ts={t.due} /> : <span>沒有截止日</span>}
 					{files > 0 && <span>· 已上傳 {files} 個檔案</span>}
-					{t.kind === "quiz" && <span>· 測驗（在 E3 作答）</span>}
+					{t.kind === "quiz" && <span>· 測驗（在 {siteLabel()} 作答）</span>}
 				</span>
 			</span>
 			<span className="flex shrink-0 flex-col items-end gap-1">

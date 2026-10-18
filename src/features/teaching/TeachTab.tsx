@@ -1,7 +1,7 @@
 import { assignRules, useAssignments } from "@/features/assignments/api";
 import type { ParsedCourse } from "@/features/courses/parse";
 import { callMany } from "@/lib/moodle/client";
-import { e3Link } from "@/lib/moodle/files";
+import { e3Link, siteLabel } from "@/lib/moodle/files";
 import type { Assignment } from "@/lib/moodle/types";
 import { Due } from "@/shared/ui/Time";
 import { Empty, Lines } from "@/shared/ui/States";
@@ -88,7 +88,7 @@ export function TeachTab({ course }: { course: ParsedCourse }) {
 
 	const inEm3 = [
 		{ to: "/courses/$courseId/announce", label: "發公告", desc: "Markdown 或按鈕排版，發布前先預覽", icon: MegaphoneIcon },
-		{ to: "/courses/$courseId/write", label: "寫教材", desc: "寫好複製，貼進 E3 的表單", icon: NotePencilIcon },
+		{ to: "/courses/$courseId/write", label: "寫教材", desc: `寫好複製，貼進 ${siteLabel()} 的表單`, icon: NotePencilIcon },
 		{ to: "/courses/$courseId/quiz-builder", label: "小考出題", desc: "打題目、匯出 Moodle XML 匯入題庫", icon: ExamIcon }
 	] as const;
 	const inE3 = [
@@ -173,8 +173,10 @@ export function TeachTab({ course }: { course: ParsedCourse }) {
 			</section>
 
 			<section>
-				<h3 className="mb-1 text-sm font-semibold text-base-content/70">到 E3 做</h3>
-				<p className="mb-3 text-xs text-base-content/50">E3 沒有開放這些操作的 API，會在新分頁打開 E3 對應的頁面。</p>
+				<h3 className="mb-1 text-sm font-semibold text-base-content/70">到 {siteLabel()} 做</h3>
+				<p className="mb-3 text-xs text-base-content/50">
+					{siteLabel()} 沒有開放這些操作的 API，會在新分頁打開 {siteLabel()} 對應的頁面。
+				</p>
 				<ul className="grid grid-cols-1 gap-1 sm:grid-cols-2">
 					{inE3.map(x => (
 						<li key={x.href}>

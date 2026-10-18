@@ -2,7 +2,7 @@ import { FileIcon } from "@/features/course/FileIcon";
 import { openFile } from "@/features/course/FilePreview";
 import { useCourseIndex } from "@/features/courses/api";
 import { usePrefs } from "@/features/preferences/store";
-import { cleanHtml, e3Link, fileExt, humanSize, linkify } from "@/lib/moodle/files";
+import { cleanHtml, e3Link, fileExt, humanSize, linkify, siteLabel } from "@/lib/moodle/files";
 import { fullDateTime } from "@/lib/time/relative";
 import { CourseTag } from "@/shared/ui/CourseTag";
 import { ErrorNote, Lines } from "@/shared/ui/States";
@@ -57,7 +57,7 @@ export function DiscussionPage() {
 			)}
 			<footer className="mt-10 border-t hairline pt-4 text-sm text-base-content/50">
 				<a className="link link-hover inline-flex items-center gap-1" href={e3Link(`/mod/forum/discuss.php?d=${discussionId}`)} target="_blank" rel="noreferrer">
-					<ArrowSquareOutIcon size={14} />在 E3 開啟（要回覆時用）
+					<ArrowSquareOutIcon size={14} />在 {siteLabel()} 開啟（要回覆時用）
 				</a>
 				{course && (
 					<Link to="/courses/$courseId" params={{ courseId }} search={{ tab: "announcements" }} className="link link-hover ml-4">

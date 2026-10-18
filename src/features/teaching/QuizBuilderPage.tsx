@@ -1,6 +1,6 @@
 import { useCourseIndex } from "@/features/courses/api";
 import { saveBlob } from "@/lib/download";
-import { cleanHtml, e3Link } from "@/lib/moodle/files";
+import { cleanHtml, e3Link, siteLabel } from "@/lib/moodle/files";
 import { markdownToHtml } from "@/shared/editor/markdown";
 import { CourseTag } from "@/shared/ui/CourseTag";
 import { ArrowDownIcon, ArrowLeftIcon, ArrowUpIcon, ClipboardTextIcon, DownloadSimpleIcon, PlusIcon, TrashIcon, WarningIcon } from "@phosphor-icons/react";
@@ -63,7 +63,8 @@ export function QuizBuilderPage() {
 				{course && <CourseTag course={course} link />}
 				<h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">小考出題</h1>
 				<p className="mt-1 max-w-2xl text-sm text-base-content/55">
-					在這裡打題目，下載成 Moodle XML，再到 E3 的題庫匯入。E3 沒有開放建立小考的 API，所以小考本身（開放時間、作答次數）還是要在 E3 設定；題目只要匯入一次。草稿存在這個瀏覽器。
+					在這裡打題目，下載成 Moodle XML，再到 {siteLabel()} 的題庫匯入。{siteLabel()} 沒有開放建立小考的 API，所以小考本身（開放時間、作答次數）還是要在 {siteLabel()}{" "}
+					設定；題目只要匯入一次。草稿存在這個瀏覽器。
 				</p>
 			</header>
 
@@ -122,12 +123,12 @@ export function QuizBuilderPage() {
 						<li>
 							打開
 							<a className="link mx-1" href={e3Link(`/question/bank/importquestions/import.php?courseid=${courseId}`)} target="_blank" rel="noreferrer">
-								E3 題庫匯入
+								{siteLabel()} 題庫匯入
 							</a>
 							，格式選「Moodle XML」，上傳檔案。
 						</li>
 						<li>
-							到 E3 新增或打開小考，「新增題目 → 從題庫」選這個類別。
+							到 {siteLabel()} 新增或打開小考，「新增題目 → 從題庫」選這個類別。
 							<a className="link ml-1" href={e3Link(`/course/modedit.php?add=quiz&course=${courseId}&section=0&return=0`)} target="_blank" rel="noreferrer">
 								新增小考
 							</a>
@@ -275,7 +276,7 @@ function QuestionCard({
 					)}
 				</div>
 			)}
-			{q.type === "essay" && <p className="mt-3 text-xs text-base-content/50">學生用文字編輯器作答，交卷後由老師或助教在 E3 批改。</p>}
+			{q.type === "essay" && <p className="mt-3 text-xs text-base-content/50">學生用文字編輯器作答，交卷後由老師或助教在 {siteLabel()} 批改。</p>}
 		</section>
 	);
 }

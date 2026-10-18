@@ -1,5 +1,5 @@
 import { FileIcon } from "@/features/course/FileIcon";
-import { fileExt, humanSize } from "@/lib/moodle/files";
+import { fileExt, humanSize, siteLabel } from "@/lib/moodle/files";
 import type { Assignment, InlineFile, SubmissionStatus } from "@/lib/moodle/types";
 import { CheckCircleIcon, CloudArrowUpIcon, LockIcon, TrashIcon, WarningIcon } from "@phosphor-icons/react";
 import { AnimatePresence, motion } from "motion/react";
@@ -36,7 +36,7 @@ export function SubmitPanel({ assignment, status, state, rules, existing }: { as
 	]);
 
 	const canEdit = status?.lastattempt?.canedit ?? true;
-	if (!rules.fileEnabled && !rules.textEnabled) return <Notice icon={<CheckCircleIcon size={18} />} text="這份作業不需要在 E3 上繳交（可能是紙本、口頭或其他平台）。" />;
+	if (!rules.fileEnabled && !rules.textEnabled) return <Notice icon={<CheckCircleIcon size={18} />} text={`這份作業不需要在 ${siteLabel()} 上繳交（可能是紙本、口頭或其他平台）。`} />;
 	if (state === "upcoming") return <Notice icon={<LockIcon size={18} />} text="還沒開放繳交。" />;
 	if (state === "closed" || !canEdit) return <Notice icon={<LockIcon size={18} />} text="已經關閉，無法再繳交或修改。" />;
 
@@ -179,7 +179,7 @@ export function SubmitPanel({ assignment, status, state, rules, existing }: { as
 						<motion.span initial={{ scale: 0, rotate: -30 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 500, damping: 15 }}>
 							<CheckCircleIcon size={22} weight="fill" />
 						</motion.span>
-						繳交完成，E3 已經收到了。
+						繳交完成，{siteLabel()} 已經收到了。
 					</motion.div>
 				) : (
 					<motion.button key="submit" whileTap={{ scale: 0.97 }} className="btn btn-primary mt-4 w-full" disabled={!ready} onClick={() => setConfirming(true)}>
@@ -231,7 +231,7 @@ function ConfirmDialog({
 		<dialog ref={ref} className="modal modal-bottom sm:modal-middle" onClose={onCancel}>
 			<div className="modal-box">
 				<h3 className="text-lg font-semibold">確定要繳交「{name}」？</h3>
-				<p className="mt-1 text-sm text-base-content/60">E3 上這份作業的檔案會變成下面這些：</p>
+				<p className="mt-1 text-sm text-base-content/60">{siteLabel()} 上這份作業的檔案會變成下面這些：</p>
 				<ul className="mt-3 space-y-1 text-sm">
 					{[...kept.map(n => [n, "保留"]), ...added.map(n => [n, "新增"])].map(([n, tag]) => (
 						<li key={n + tag} className="flex items-center gap-2">

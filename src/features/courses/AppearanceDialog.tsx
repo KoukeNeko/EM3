@@ -3,6 +3,7 @@ import { ArrowCounterClockwiseIcon, EyeSlashIcon, PushPinIcon } from "@phosphor-
 import { useEffect, useRef } from "react";
 import { COURSE_COLORS, COURSE_ICONS, CourseGlyph, defaultColor, defaultIcon, useCourseLook } from "./look";
 import type { ParsedCourse } from "./parse";
+import { siteLabel } from "@/lib/moodle/files";
 
 /** Per-course colour, icon, nickname, pin and hide — all stored locally. */
 export function AppearanceDialog({ course, open, onClose }: { course: ParsedCourse; open: boolean; onClose: () => void }) {
@@ -84,7 +85,7 @@ export function AppearanceDialog({ course, open, onClose }: { course: ParsedCour
 					</label>
 					<label className="flex cursor-pointer items-center gap-3 text-sm">
 						<EyeSlashIcon size={18} />
-						<span className="grow">在 EM3 隱藏這門課（不影響 E3）</span>
+						<span className="grow">在 EM3 隱藏這門課（不影響 {siteLabel()}）</span>
 						<input type="checkbox" className="toggle toggle-sm" checked={look.hidden} onChange={e => patch({ hidden: e.target.checked })} />
 					</label>
 				</div>

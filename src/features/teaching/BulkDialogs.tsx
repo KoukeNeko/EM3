@@ -8,6 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { displayName, feedbackComment, feedbackFiles, fetchAllStatuses, isAuditor, type Participant, submittedFiles, useGrantExtension, useSaveGrade, useStudentIds } from "./api";
 import { buildSubmissionZip, type CsvGrade, gradesCsv, gradesFromCsv, matchFeedbackFiles, readCsv } from "./bundle";
+import { siteLabel } from "@/lib/moodle/files";
 
 export type BulkKind = "download" | "csv" | "files" | "extend";
 
@@ -262,7 +263,7 @@ function CsvImport({ assignment, participants, grades, sids, onClose }: Sub) {
 								取消
 							</button>
 							<button className="btn btn-primary" disabled={!plan.ok.length} onClick={() => void apply()}>
-								寫入 {plan.ok.length} 筆成績到 E3
+								寫入 {plan.ok.length} 筆成績到 {siteLabel()}
 							</button>
 						</div>
 					)}

@@ -1,3 +1,4 @@
+import { siteLabel } from "@/lib/moodle/files";
 import type { Quiz, ReviewQuestionRaw } from "./api";
 
 // E3 returns each reviewed question as the HTML of its own quiz page: a form
@@ -151,7 +152,7 @@ const STRINGS: Record<
 		options: string;
 		mine: string;
 		answer: string;
-		right: string;
+		right: () => string;
 		feedback: string;
 		explanation: string;
 		score: string;
@@ -190,7 +191,7 @@ const STRINGS: Record<
 		options: "選項",
 		mine: "← 我的選擇",
 		answer: "我的作答",
-		right: "E3 顯示的正確答案",
+		right: () => `${siteLabel()} 顯示的正確答案`,
 		feedback: "老師的回饋",
 		explanation: "老師的解說",
 		score: "得分",
@@ -222,7 +223,7 @@ const STRINGS: Record<
 		options: "选项",
 		mine: "← 我的选择",
 		answer: "我的作答",
-		right: "E3 显示的正确答案",
+		right: () => `${siteLabel()} 显示的正确答案`,
 		feedback: "老师的反馈",
 		explanation: "老师的讲解",
 		score: "得分",
@@ -255,7 +256,7 @@ const STRINGS: Record<
 		options: "Options",
 		mine: "← my choice",
 		answer: "My answer",
-		right: "Correct answer shown by E3",
+		right: () => `Correct answer shown by ${siteLabel()}`,
 		feedback: "Feedback",
 		explanation: "Teacher's explanation",
 		score: "Score",
@@ -288,7 +289,7 @@ const STRINGS: Record<
 		options: "選択肢",
 		mine: "← 私の選択",
 		answer: "私の解答",
-		right: "E3 に表示された正解",
+		right: () => `${siteLabel()} に表示された正解`,
 		feedback: "フィードバック",
 		explanation: "先生の解説",
 		score: "得点",
@@ -343,7 +344,7 @@ export function buildStudyPrompt({
 		} else if (q.formulationText) {
 			out.push(`${s.answer}${c.trim()}`, q.formulationText, "");
 		}
-		if (q.rightAnswer) out.push(`${s.right}${c}${q.rightAnswer.replace(/^[^:：]*[:：]\s*/, "")}`);
+		if (q.rightAnswer) out.push(`${s.right()}${c}${q.rightAnswer.replace(/^[^:：]*[:：]\s*/, "")}`);
 		const fb = htmlText(q.specificFeedback);
 		if (fb) out.push(`${s.feedback}${c}${fb}`);
 		const gen = htmlText(q.generalFeedback);

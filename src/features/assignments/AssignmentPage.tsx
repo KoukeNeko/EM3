@@ -1,7 +1,7 @@
 import { FileIcon } from "@/features/course/FileIcon";
 import { openFile } from "@/features/course/FilePreview";
 import { useCourseIndex } from "@/features/courses/api";
-import { cleanHtml, e3Link, fileExt, humanSize } from "@/lib/moodle/files";
+import { cleanHtml, e3Link, fileExt, humanSize, siteLabel } from "@/lib/moodle/files";
 import type { InlineFile } from "@/lib/moodle/types";
 import { countdown, deadlinePhrase, fullDateTime } from "@/lib/time/relative";
 import { CourseTag } from "@/shared/ui/CourseTag";
@@ -97,7 +97,7 @@ export function AssignmentPage() {
 							<Fact
 								icon={<PaperclipIcon size={16} />}
 								label="繳交方式"
-								value={rules.fileEnabled ? `檔案，最多 ${rules.maxFiles} 個` : rules.textEnabled ? "線上文字" : "不用在 E3 繳交"}
+								value={rules.fileEnabled ? `檔案，最多 ${rules.maxFiles} 個` : rules.textEnabled ? "線上文字" : `不用在 ${siteLabel()} 繳交`}
 								hint={rules.accept.length ? `限 ${rules.accept.join(" ")}` : rules.fileEnabled ? "不限檔案類型" : undefined}
 							/>
 						)}
@@ -157,7 +157,7 @@ export function AssignmentPage() {
 					</section>
 					<SubmitPanel assignment={a} status={st} state={state} rules={rules} existing={files} />
 					<a className="btn btn-ghost btn-sm w-full" href={e3Link(`/mod/assign/view.php?id=${a.cmid}`)} target="_blank" rel="noreferrer">
-						<ArrowSquareOutIcon size={15} />在 E3 開啟這份作業
+						<ArrowSquareOutIcon size={15} />在 {siteLabel()} 開啟這份作業
 					</a>
 				</aside>
 			</div>

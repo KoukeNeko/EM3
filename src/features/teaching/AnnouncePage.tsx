@@ -3,7 +3,7 @@ import { FileIcon } from "@/features/course/FileIcon";
 import { useCourseIndex } from "@/features/courses/api";
 import { useCourseLook } from "@/features/courses/look";
 import { call, uploadToDraft } from "@/lib/moodle/client";
-import { cleanHtml, fileExt, humanSize } from "@/lib/moodle/files";
+import { cleanHtml, fileExt, humanSize, siteLabel } from "@/lib/moodle/files";
 import { MarkdownEditor, markdownToHtml } from "@/shared/editor/MarkdownEditor";
 import { MOD_LABEL, useHotkeys } from "@/shared/keyboard/hotkeys";
 import { CourseTag } from "@/shared/ui/CourseTag";
@@ -85,7 +85,9 @@ export function AnnouncePage() {
 			<header className="mb-6">
 				{course && <CourseTag course={course} link />}
 				<h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">發布公告</h1>
-				<p className="mt-1 text-sm text-base-content/55">會發到「{news?.name ?? "公告"}」，全班看得到。E3 依學生自己的通知設定寄信，沒辦法從這裡排程或指定立即寄出。</p>
+				<p className="mt-1 text-sm text-base-content/55">
+					會發到「{news?.name ?? "公告"}」，全班看得到。{siteLabel()} 依學生自己的通知設定寄信，沒辦法從這裡排程或指定立即寄出。
+				</p>
 			</header>
 			{!news && <div className="alert alert-soft alert-warning mb-4">這門課沒有公告區，或你沒有權限在公告區發文。</div>}
 
