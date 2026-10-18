@@ -16,12 +16,14 @@ interface Pending {
 	baseUrl: string;
 	passport: string;
 	remember: boolean;
+	/** Page to open after signing in, as for password login. */
+	next?: string;
 	at: number;
 }
 
-export function startSso(baseUrl: string, providerId: number, remember: boolean) {
+export function startSso(baseUrl: string, providerId: number, remember: boolean, next?: string) {
 	const passport = Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, "0")).join("");
-	const pending: Pending = { baseUrl, passport, remember, at: Date.now() };
+	const pending: Pending = { baseUrl, passport, remember, next, at: Date.now() };
 	// localStorage, not sessionStorage: the protocol handler may open the result in a new tab.
 	localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
 	try {
@@ -34,7 +36,7 @@ export function startSso(baseUrl: string, providerId: number, remember: boolean)
 }
 
 /** Verify the link from Moodle against the pending launch and return what `signInWithToken` needs. */
-export function finishSso(link: string): { baseUrl: string; token: string; remember: boolean } {
+export function finishSso(link: string): { baseUrl: string; token: string; remember: boolean; next?: string } {
 	let pending: Pending | null = null;
 	try {
 		pending = JSON.parse(localStorage.getItem(PENDING_KEY) ?? "null");
@@ -43,8 +45,8 @@ export function finishSso(link: string): { baseUrl: string; token: string; remem
 	}
 	if (!pending || Date.now() - pending.at > PENDING_MS) throw new Error("單一登入已逾時，請重新開始");
 	const token = decodeSsoToken(link, pending.baseUrl, pending.passport);
-	localStorage.removeItem(PENDING_KEY);
-	return { baseUrl: pending.baseUrl, token, remember: pending.remember };
+	// Kept on purpose: if the sign-in that follows fails (network), the same link can be tried again. It expires on its own.
+	return { baseUrl: pending.baseUrl, token, remember: pending.remember, next: pending.next };
 }
 
 /** The passport check stops a crafted link from signing the user in to someone else's account. */

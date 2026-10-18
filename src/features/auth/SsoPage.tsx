@@ -15,9 +15,10 @@ export function SsoPage() {
 		if (!u || started.current) return;
 		started.current = true;
 		(async () => {
-			const { baseUrl, token, remember } = finishSso(u);
+			const { baseUrl, token, remember, next } = finishSso(u);
 			await signInWithToken(baseUrl, token, remember);
-			await navigate({ to: "/", replace: true });
+			const target = next?.replace(/^#/, "");
+			await navigate({ to: target && target !== "/login" ? target : "/", replace: true });
 		})().catch(err => setError(err instanceof Error ? err.message : "登入失敗，請稍後再試"));
 	}, [u, signInWithToken, navigate]);
 
