@@ -20,6 +20,8 @@ interface SessionState {
 	userid: number | null;
 	baseUrl: string;
 	signIn: (baseUrl: string, username: string, password: string, remember: boolean) => Promise<SiteInfo>;
+	/** For SSO sites, where Moodle hands out the token instead of exchanging a password. */
+	signInWithToken: (baseUrl: string, token: string, remember: boolean) => Promise<SiteInfo>;
 	signOut: () => void;
 }
 
@@ -45,8 +47,11 @@ export const useSession = create<SessionState>((set, get) => ({
 	userid: initial?.userid ?? null,
 	baseUrl: initialBaseUrl,
 	async signIn(baseUrl, username, password, remember) {
+		const { token } = await requestToken(baseUrl, username.trim(), password);
+		return get().signInWithToken(baseUrl, token, remember);
+	},
+	async signInWithToken(baseUrl, token, remember) {
 		const normalizedBaseUrl = normalizeMoodleUrl(baseUrl);
-		const { token } = await requestToken(normalizedBaseUrl, username.trim(), password);
 		const previousBaseUrl = get().baseUrl;
 		const previousToken = get().token;
 		setMoodleBaseUrl(normalizedBaseUrl);
