@@ -41,7 +41,11 @@ export function startSso(baseUrl: string, providerId: number, remember: boolean,
 	// localStorage, not sessionStorage: the protocol handler may open the result in a new tab.
 	localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
 	const query = new URLSearchParams({ service: "moodle_mobile_app", passport, urlscheme: SCHEME, oauthsso: String(providerId), confirmed: "1" });
-	location.assign(`${moodleUrl(baseUrl, "admin/tool/mobile/launch.php")}?${query}`);
+	const url = `${moodleUrl(baseUrl, "admin/tool/mobile/launch.php")}?${query}`;
+	// Without a protocol handler the user pastes the link back, so keep this tab on the login page.
+	const tab = "registerProtocolHandler" in navigator ? null : window.open(url, "_blank");
+	if (tab) tab.opener = null;
+	else location.assign(url);
 }
 
 /** Verify the link from Moodle against the pending launch and return what `signInWithToken` needs. */

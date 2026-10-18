@@ -1,6 +1,6 @@
 import { MoodleError } from "@/lib/moodle/client";
 import { DEFAULT_MOODLE_URL, MOODLE_SITES } from "@/lib/moodle/site";
-import { registerSsoHandler, startSso } from "@/lib/moodle/sso";
+import { finishSso, registerSsoHandler, startSso } from "@/lib/moodle/sso";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { ArrowRightIcon, EyeIcon, EyeSlashIcon, LockSimpleIcon, ShieldCheckIcon, UserIcon } from "@phosphor-icons/react";
 import { motion } from "motion/react";
@@ -42,7 +42,14 @@ export function LoginPage() {
 		}
 	}
 
-	const pasteSsoLink = () => navigate({ to: "/sso", search: { u: ssoLink } });
+	const pasteSsoLink = () => {
+		try {
+			finishSso(ssoLink); // Check here first, so a wrong paste keeps the school picked.
+		} catch (err) {
+			return setError(err instanceof Error ? err.message : "連結格式不正確");
+		}
+		void navigate({ to: "/sso", search: { u: ssoLink } });
+	};
 
 	return (
 		<main className="relative flex min-h-dvh flex-col items-center justify-center overflow-x-hidden bg-base-200 px-4 py-6">
@@ -165,7 +172,7 @@ export function LoginPage() {
 						<details open={!("registerProtocolHandler" in navigator)} className="text-xs text-base-content/60">
 							<summary className="cursor-pointer">單一登入完成後沒有回到 EM3？</summary>
 							<p className="mt-2 leading-relaxed">
-								在 {sso.pageName ?? "Moodle"} 的完成頁面對「{sso.linkText ?? "若應用程式沒有自動開啟，請點選這裡"}」的連結按右鍵複製連結，貼在這裡。
+								在 {sso.pageName ?? "Moodle"} 的完成頁面，長按或按右鍵複製「{sso.linkText ?? "若應用程式沒有自動開啟，請點選這裡"}」的連結，回到這個分頁貼在這裡。
 							</p>
 							<div className="join mt-2 w-full">
 								<input className="input input-sm join-item grow" placeholder="web+emthree://token=…" value={ssoLink} onChange={e => setSsoLink(e.target.value)} />
