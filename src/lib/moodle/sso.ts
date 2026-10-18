@@ -22,16 +22,24 @@ interface Pending {
 	at: number;
 }
 
+/**
+ * Ask the browser to send `web+emtech:` links back to EM3. Call it while the user stays on the page
+ * (when they pick an SSO school): Chrome answers with a permission prompt, which leaving for Moodle
+ * right away would dismiss before the user can allow it.
+ */
+export function registerSsoHandler() {
+	try {
+		navigator.registerProtocolHandler(SCHEME, `${location.origin}${location.pathname}#/sso?u=%s`);
+	} catch {
+		// Missing in Safari and on insecure origins: the paste box covers those.
+	}
+}
+
 export function startSso(baseUrl: string, providerId: number, remember: boolean, next?: string) {
 	const passport = Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, "0")).join("");
 	const pending: Pending = { baseUrl, passport, remember, next, at: Date.now() };
 	// localStorage, not sessionStorage: the protocol handler may open the result in a new tab.
 	localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
-	try {
-		navigator.registerProtocolHandler(SCHEME, `${location.origin}${location.pathname}#/sso?u=%s`);
-	} catch {
-		// Unsupported or refused: the paste fallback still works.
-	}
 	const query = new URLSearchParams({ service: "moodle_mobile_app", passport, urlscheme: SCHEME, oauthsso: String(providerId), confirmed: "1" });
 	location.assign(`${moodleUrl(baseUrl, "admin/tool/mobile/launch.php")}?${query}`);
 }

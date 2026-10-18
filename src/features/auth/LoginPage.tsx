@@ -1,6 +1,6 @@
 import { MoodleError } from "@/lib/moodle/client";
 import { DEFAULT_MOODLE_URL, MOODLE_SITES } from "@/lib/moodle/site";
-import { startSso } from "@/lib/moodle/sso";
+import { registerSsoHandler, startSso } from "@/lib/moodle/sso";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { ArrowRightIcon, EyeIcon, EyeSlashIcon, LockSimpleIcon, ShieldCheckIcon, UserIcon } from "@phosphor-icons/react";
 import { motion } from "motion/react";
@@ -77,6 +77,7 @@ export function LoginPage() {
 									const custom = e.target.value === "custom";
 									setCustomSite(custom);
 									setBaseUrl(custom ? "" : e.target.value);
+									if (MOODLE_SITES.find(site => site.baseUrl === e.target.value)?.sso) registerSsoHandler();
 								}}
 							>
 								{MOODLE_SITES.map(site => (
@@ -157,6 +158,9 @@ export function LoginPage() {
 						<button type="button" className={`btn w-full ${passwordLogin ? "btn-outline" : "btn-neutral btn-lg"}`} disabled={busy} onClick={() => startSso(baseUrl, sso.provider, remember, next)}>
 							使用學校單一登入（SSO）
 						</button>
+						{"registerProtocolHandler" in navigator && (
+							<p className="text-xs leading-relaxed text-base-content/60">瀏覽器若詢問是否允許開啟 web+emtech 連結，請先按「允許」再登入，登入後就會自動回到 EM3。</p>
+						)}
 						{/* Safari cannot register the web+emtech handler, so there the paste box is the main path. */}
 						<details open={!("registerProtocolHandler" in navigator)} className="text-xs text-base-content/60">
 							<summary className="cursor-pointer">單一登入完成後沒有回到 EM3？</summary>
