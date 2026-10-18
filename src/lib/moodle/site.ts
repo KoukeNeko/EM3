@@ -3,12 +3,16 @@ export const DEFAULT_MOODLE_URL = "https://e3p.nycu.edu.tw";
 export interface MoodleSite {
 	name: string;
 	baseUrl: string;
+	/** OAuth2 provider id for sites whose accounts only sign in through the school's SSO (see sso.ts). */
+	sso?: number;
+	/** `false` when the school only allows SSO, so the password form is hidden. */
+	password?: false;
 }
 
 /** Sites whose Moodle mobile token endpoint and browser CORS support were verified. */
 export const MOODLE_SITES: readonly MoodleSite[] = [
 	{ name: "國立陽明交通大學", baseUrl: DEFAULT_MOODLE_URL },
-	{ name: "國立中正大學", baseUrl: "https://ecourse2.ccu.edu.tw" },
+	{ name: "國立中正大學", baseUrl: "https://ecourse2.ccu.edu.tw", sso: 1, password: false },
 	{ name: "國立臺灣師範大學", baseUrl: "https://moodle3.ntnu.edu.tw" },
 	{ name: "國立政治大學", baseUrl: "https://moodle45.nccu.edu.tw" },
 	{ name: "國立成功大學", baseUrl: "https://moodle.ncku.edu.tw" },
