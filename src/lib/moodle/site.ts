@@ -15,7 +15,7 @@ export interface MoodleSite {
 	password?: false;
 }
 
-/** Sites whose Moodle mobile token endpoint and browser CORS support were verified. */
+/** Sites whose Moodle mobile endpoints and browser CORS work; the login methods each accepts are per entry. */
 export const MOODLE_SITES: readonly MoodleSite[] = [
 	{ name: "國立陽明交通大學", baseUrl: DEFAULT_MOODLE_URL },
 	{ name: "國立中正大學", baseUrl: "https://ecourse2.ccu.edu.tw", sso: { provider: 1, pageName: "eCourse2" }, password: false },
